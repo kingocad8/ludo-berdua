@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ludo Berdua — Satu papan, dua hati</title>
+<style>
+  :root{--rose:#b3405e;--rose2:#e8a2b0;--cream:#fff7f0;--teal:#0f5e5a;--amber:#d99a2b;--ink:#2b2226}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--cream);color:var(--ink)}
+  header{padding:20px 16px 8px;text-align:center}
+  h1{margin:0;font-size:32px;color:var(--rose)}
+  header p{margin:6px 0;color:#6b5a60}
+  main{max-width:560px;margin:0 auto;padding:8px 16px 32px}
+  .card{background:#fff;border:1px solid #f0d9de;border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(179,64,94,.08)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .names{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .names label{font-size:13px;color:#6b5a60}
+  .names input{width:100%;padding:10px;border:1px solid #e5cdd2;border-radius:10px;margin-top:4px;font-size:15px}
+  .names input.active1{border:2px solid var(--rose)}
+  .names input.active2{border:2px solid var(--teal)}
+  #turnBanner{border-radius:14px;padding:12px 14px;text-align:center;font-weight:800;font-size:18px;color:#fff;margin:12px 0;transition:background .3s}
+  #turnBanner.p1{background:var(--rose)}
+  #turnBanner.p2{background:var(--teal)}
+  #turnBanner .sub{font-weight:400;font-size:13px;opacity:.9}
+  #turnBanner.pulse{animation:pulse 1s ease-in-out infinite alternate}
+  @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.02)}}
+  #board{display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:14px 0;background:#e8d5d9;border:2px solid #e8d5d9;border-radius:12px;overflow:hidden}
+  .cell{min-height:32px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8a767c;position:relative}
+  .cell.base1{background:var(--rose)}
+  .cell.base2{background:var(--teal)}
+  .cell.baseX{background:#e9e2d8}
+  .cell.baseInner{background:#fff}
+  .cell.trackHeart{background:#fdeef1}
+  .cell.cellTruth{background:#d5ebe8}
+  .cell.cellDare{background:#fdeef1}
+  .cell.start1{background:#f9d7de}
+  .cell.start2{background:#d5ebe8}
+  .cell.home1{background:#f9d7de}
+  .cell.home2{background:#d5ebe8}
+  .cell.homeX{background:#f2efe9}
+  .cell.center{background:linear-gradient(135deg,var(--rose),var(--teal));color:#fff;font-weight:800}
+  .tok{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
+  .p1{background:var(--rose)} .p2{background:var(--teal)}
+  .tok.hopping{animation:hop .28s ease}
+  @keyframes hop{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.25)}100%{transform:translateY(0) scale(1)}}
+  button{border:0;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer}
+  .primary{background:var(--rose);color:#fff}
+  .secondary{background:#fff;border:1px solid #e5cdd2;color:var(--ink)}
+  .teal{background:var(--teal);color:#fff}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .topicBtn{padding:8px 12px;font-size:13px;border-radius:20px}
+  .topicBtn.active{background:var(--rose);color:#fff;border:1px solid var(--rose)}
+  .topicBtn.locked{opacity:.45}
+  #dice{font-size:42px;text-align:center;margin:8px 0}
+  #status{text-align:center;font-weight:700;margin:8px 0}
+  #log{font-size:13px;color:#6b5a60;min-height:20px;text-align:center}
+  .overlay{position:fixed;inset:0;background:rgba(30,15,20,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+  .modal{background:#fff;border-radius:18px;padding:22px;max-width:480px;width:100%;text-align:center}
+  .modal h2{margin-top:0}
+  .small{font-size:13px;color:#6b5a60;line-height:1.5}
+  input[type=text]{padding:11px;border:1px solid #e5cdd2;border-radius:10px;font-size:15px}
+  #unlockBox{margin-top:14px;text-align:center}
+  #bigDice{font-size:96px;animation:shake .12s infinite}
+  @keyframes shake{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-4px)}100%{transform:rotate(-8deg)}}
+  footer{text-align:center;font-size:12px;color:#8a767c;padding:0 16px 24px;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>♥ Ludo Berdua</h1>
+  <p>Satu papan, dua hati. Game Truth or Dare untuk pasangan dewasa — pasutri, PDKT, atau menuju serius.</p>
+</header>
+
+<main>
+  <div class="card">
+    <div class="names">
+      <div><label>Pemain 1 ♥</label><input id="name1" type="text" value="Pemain 1"></div>
+      <div><label>Pemain 2 ♥</label><input id="name2" type="text" value="Pemain 2"></div>
+    </div>
+    <div id="turnBanner" class="p1 pulse">♥ Giliran Pemain 1<div class="sub">Pion merah muda jalan dulu</div></div>
+    <div id="status">Pion masih di home. Lempar dadu untuk mulai.</div>
+    <div id="dice">🎲</div>
+    <div class="row" style="justify-content:center">
+      <button class="primary" id="rollBtn" onclick="rollDice()">Kocok Dadu</button>
+      <button class="secondary" onclick="resetGame()">Mulai Ulang</button>
+      <button class="secondary" id="musicBtn" onclick="toggleMusic()">Musik: Nyala</button>
+      <button class="secondary" id="sfxBtn" onclick="toggleSfx()">Suara: Nyala</button>
+    </div>
+    <div id="log">Lempar dadu untuk mulai. Mendarat di 💬 = kartu Truth, di ⚡ = kartu Dare.</div>
+    <div id="board"></div>
+    <p class="small" style="text-align:center">Papan Ludo klasik: plus di tengah + 4 kotak home di pojok. 1 pion per pemain, tanpa makan pion, supaya permainan tetap hangat. Kotak 💬 hijau tosca = kartu Truth, kotak ⚡ merah muda = kartu Dare. Mendarat di sana langsung dapat kartunya.</p>
+    <div id="unlockBox">
+      <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>
+      <div id="topicRow" class="row" style="justify-content:center;margin:10px 0">
+        <button class="topicBtn active" data-topic="semua" onclick="selectTopic('semua')">Semua Topik 🔒</button>
+        <button class="topicBtn locked" data-topic="umum" onclick="selectTopic('umum')">Umum 🔒</button>
+        <button class="topicBtn locked" data-topic="honeymoon" onclick="selectTopic('honeymoon')">Honeymoon 🔒</button>
+        <button class="topicBtn locked" data-topic="kehamilan" onclick="selectTopic('kehamilan')">Kehamilan 🔒</button>
+        <button class="topicBtn locked" data-topic="anniversary" onclick="selectTopic('anniversary')">Anniversary 🔒</button>
+        <button class="topicBtn locked" data-topic="liburan" onclick="selectTopic('liburan')">Liburan 🔒</button>
+        <button class="topicBtn locked" data-topic="ranjang" onclick="selectTopic('ranjang')">Ranjang 🔒</button>
+        <button class="topicBtn locked" data-topic="politik" onclick="selectTopic('politik')">Politik 🔒</button>
+        <button class="topicBtn locked" data-topic="ekonomi" onclick="selectTopic('ekonomi')">Ekonomi 🔒</button>
+        <button class="topicBtn locked" data-topic="agama" onclick="selectTopic('agama')">Agama 🔒</button>
+        <button class="topicBtn locked" data-topic="masa-depan" onclick="selectTopic('masa-depan')">Masa Depan 🔒</button>
+        <button class="topicBtn locked" data-topic="rumah-tangga" onclick="selectTopic('rumah-tangga')">Rumah Tangga 🔒</button>
+      </div>
+      <p class="small" id="topicNote">Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.</p>
+      <div class="row" style="justify-content:center">
+        <input id="codeInput" type="text" placeholder="Masukkan kode akses Lynk">
+        <button class="teal" onclick="unlockFull()">Buka Deck Lengkap</button>
+      </div>
+      <p class="small">Kode uji coba prototipe ini: <b>BERDUA</b> (ganti dengan daftar kode Lynk sebelum launching).</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Khusus dewasa 18+ dan dimainkan atas persetujuan bersama. Game ini berjalan lokal di perangkatmu, tidak mengirim data apa pun ke server. Kalau salah satu tidak nyaman dengan sebuah kartu, lewati saja, tanpa hukuman. Musik dan suara dibuat dari Web Audio di perangkatmu, tanpa lagu berlisensi.
+</footer>
+
+<div class="overlay" id="gate">
+  <div class="modal">
+    <h2>18+ Saja, Ya</h2>
+    <p class="small">Ludo Berdua adalah game Truth or Dare untuk pasangan dewasa, dengan bumbu romantis yang sopan, bukan konten pornografi. Topik Deep Talk cocok buat PDKT atau pasangan menuju serius, topik Ranjang khusus pasutri. Dengan menekan tombol di bawah, kamu menyatakan bahwa kalian berdua sudah dewasa (18+), bermain atas persetujuan bersama, dan bermain secara privat.</p>
+    <button class="primary" onclick="enterGame()">Kami Berdua Sudah Dewasa, Mulai Main</button>
+  </div>
+</div>
+
+<div class="overlay" id="diceOverlay" style="display:none">
+  <div class="modal">
+    <h2>Mengocok dadu…</h2>
+    <div id="bigDice">🎲</div>
+    <p class="small">Tunggu sebentar, dadunya lagi dikocok.</p>
+  </div>
+</div>
+
+<div class="overlay" id="cardOverlay" style="display:none">
+  <div class="modal">
+    <h2 id="cardTitle">Kotak Hati ♥</h2>
+    <p id="cardPrompt" class="small">Pilih Truth atau Dare.</p>
+    <div class="row" style="justify-content:center" id="choiceBtns">
+      <button class="primary" onclick="showCard('truth')">Truth</button>
+      <button class="teal" onclick="showCard('dare')">Dare</button>
+    </div>
+    <div id="cardText" style="font-size:18px;line-height:1.5;margin:16px 0"></div>
+    <div class="row" style="justify-content:center">
+      <button class="secondary" onclick="closeCard()">Lewati Kartu</button>
+      <button class="primary" id="doneBtn" style="display:none" onclick="closeCard()">Selesai, Lanjut Main</button>
+    </div>
+    <p class="small">Lewati kapan pun kalau salah satu tidak nyaman. Tidak ada hukuman.</p>
+  </div>
+</div>
+
+<div class="overlay" id="winOverlay" style="display:none">
+  <div class="modal">
+    <h2 id="winText">Selamat!</h2>
+    <p class="small">Pionmu sampai di rumah duluan. Malam ini milik kalian berdua.</p>
+    <button class="primary" onclick="resetGame()">Main Lagi</button>
+  </div>
+</div>
+
+<script>
+// ---------- Papan Ludo klasik 15x15 ----------
+// Jalur 52 kotak, berurutan, tiap langkah pindah ke kotak sebelahnya.
+const TRACK = [
+  [6,1],[6,2],[6,3],[6,4],[6,5],
+  [5,6],[4,6],[3,6],[2,6],[1,6],[0,6],
+  [0,7],
+  [0,8],[1,8],[2,8],[3,8],[4,8],[5,8],
+  [6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
+  [7,14],
+  [8,14],[8,13],[8,12],[8,11],[8,10],[8,9],
+  [9,8],[10,8],[11,8],[12,8],[13,8],[14,8],
+  [14,7],
+  [14,6],[13,6],[12,6],[11,6],[10,6],[9,6],
+  [8,5],[8,4],[8,3],[8,2],[8,1],[8,0],
+  [7,0],
+  [6,0]
+];
+const START = [0, 26]; // P1 mulai di [6,1], P2 mulai di [8,13]
+const HOME = [
+  [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
+  [[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]]
+];
+const WIN_CELL = [7,7];
+const BASE_PAWN = [[2,2],[12,12]];
+const TRUTH_IDX = new Set([2,7,13,19,25,31,37,43,49]);
+const DARE_IDX = new Set([4,10,16,22,28,34,40,46,51]);
+const HEART_IDX = new Set([...TRUTH_IDX, ...DARE_IDX]);
+const DICE_FACES = ["","⚀","⚁","⚂","⚃","⚄","⚅"];
+const WIN_STEP = 58;
+
+// ---------- Kartu: demo vs berbayar ----------
+// Semua kartu di level bumbu saja: romantis/sugestif sopan, tanpa detail grafis eksplisit.
+const demo = {
+  truth: [
+    "Apa hal kecil dari pasanganmu yang paling sering bikin kamu senyum sendiri?",
+    "Momen berdua apa yang paling ingin kamu ulang minggu ini?",
+    "Apa pujian paling sederhana yang paling kamu suka dengar dari pasanganmu?",
+    "Kapan terakhir kamu merasa paling dekat dengan pasanganmu, dan kenapa?",
+    "Apa kebiasaan pasanganmu yang diam-diam selalu kamu tunggu?",
+    "Kalau malam ini cuma boleh satu permintaan manis, kamu minta apa?"
+  ],
+  dare: [
+    "Tatap mata pasanganmu selama 20 detik tanpa tertawa.",
+    "Genggam tangan pasanganmu sampai giliran berikutnya.",
+    "Bisikkan satu hal manis di telinga pasanganmu, pelan-pelan.",
+    "Peluk pasanganmu selama 30 detik, tanpa buru-buru.",
+    "Cium kening pasanganmu, lalu bilang kenapa kamu bersyukur memilikinya.",
+    "Buatkan pasanganmu minuman favoritnya sambil bilang satu hal yang kamu suka darinya."
+  ]
+};
+const TOPICS = {
+  umum: {
+    label: "Umum",
+    truth: [
+      "Apa yang bikin kamu merasa paling diinginkan oleh pasanganmu?",
+      "Bagian mana dari momen berdua kalian yang paling ingin kamu ulang malam ini?",
+      "Apa hal yang belum pernah kamu bilang, tapi ingin pasanganmu tahu malam ini?",
+      "Kapan kamu merasa paling deg-degan di dekat pasanganmu?",
+      "Apa satu hal manis yang ingin kamu dengar dari pasanganmu sebelum tidur?",
+      "Apa yang paling kamu rindukan dari masa awal hubungan kalian?",
+      "Kalau kamu boleh mengatur satu malam berdua yang sempurna, seperti apa malam itu?",
+      "Apa yang membuatmu merasa paling aman dan dicintai oleh pasanganmu?",
+      "Hal apa yang ingin kamu coba bersama pasanganmu, tapi belum sempat kamu ajak bicara?",
+      "Apa momen paling romantis yang pernah kalian alami, versi kamu?"
+    ],
+    dare: [
+      "Pijat bahu pasanganmu selama 1 menit, tanpa buru-buru.",
+      "Peluk pasanganmu dari belakang selama 30 detik.",
+      "Tulis satu kalimat manis di telapak tangan pasanganmu, lalu biarkan ia membacanya.",
+      "Tatap pasanganmu dan sebutkan tiga hal yang kamu suka darinya, satu per satu, pelan-pelan.",
+      "Ajak pasanganmu berdansa pelan selama satu lagu, walau tanpa musik.",
+      "Suapi pasanganmu satu gigitan camilan favoritnya, dengan cara yang paling manis.",
+      "Pegang wajah pasanganmu dengan lembut dan bilang satu hal yang membuatmu jatuh cinta lagi.",
+      "Buat pasanganmu tertawa dengan satu rayuan gombal, lalu peluk ia sebagai hadiahnya.",
+      "Duduk berhadapan, genggam kedua tangannya, dan ceritakan satu kenangan favorit kalian.",
+      "Berikan pasanganmu pijatan tangan selama 1 menit sambil menanyakan harinya."
+    ]
+  },
+  honeymoon: {
+    label: "Honeymoon",
+    truth: [
+      "Momen honeymoon seperti apa yang paling ingin kamu ulang, walau cuma versi mininya di rumah?",
+      "Apa hal kecil dari pasanganmu saat liburan berdua yang paling kamu ingat sampai sekarang?",
+      "Kalau kalian honeymoon lagi besok, kota atau suasana seperti apa yang kamu pilih duluan?",
+      "Apa yang bikin kamu merasa paling dekat dengan pasanganmu saat jauh dari rutinitas?",
+      "Satu hal apa yang ingin kamu lakukan berdua di honeymoon berikutnya, yang belum pernah kalian coba?",
+      "Apa kenangan paling lucu dari perjalanan berdua kalian?",
+      "Apa yang paling kamu syukuri dari pasanganmu saat kalian lagi capek jalan seharian?",
+      "Kalau malam honeymoon ideal versi kamu, isinya ngobrol, tertawa, atau diam berdua sambil pelukan?"
+    ],
+    dare: [
+      "Rencanakan satu malam honeymoon mini di rumah minggu ini, lengkap dengan camilan dan lampu temaram.",
+      "Tulis tiga janji manis kecil untuk pasanganmu di secarik kertas, lalu bacakan satu per satu.",
+      "Ajak pasanganmu berdansa pelan seperti di malam resepsi, walau cuma di ruang tamu.",
+      "Buatkan pasanganmu sarapan spesial besok pagi, lengkap dengan satu catatan manis.",
+      "Tatap pasanganmu dan ceritakan kenangan perjalanan berdua favoritmu, sedetail yang kamu ingat.",
+      "Peluk pasanganmu lama, seperti baru bertemu setelah perjalanan jauh.",
+      "Pilih satu foto perjalanan kalian, lalu ceritakan kenapa foto itu berarti buat kamu.",
+      "Bisikkan satu rencana liburan impian kalian, lalu tanya pasanganmu mau menambahkan apa."
+    ]
+  },
+  kehamilan: {
+    label: "Kehamilan",
+    truth: [
+      "Apa harapan terbesarmu sebagai pasangan, saat membayangkan jadi orang tua nanti?",
+      "Hal apa yang paling bikin kamu terharu melihat pasanganmu di masa ini?",
+      "Apa yang paling ingin kamu dengar dari pasanganmu di hari-hari yang melelahkan?",
+      "Kenangan manis apa yang ingin kamu ceritakan nanti ke anak kalian tentang masa ini?",
+      "Apa bentuk perhatian kecil dari pasanganmu yang paling berarti buat kamu belakangan ini?",
+      "Kalau kalian membayangkan keluarga kecil kalian nanti, suasana rumah seperti apa yang kamu bayangkan?",
+      "Apa yang membuatmu merasa paling didukung oleh pasanganmu?",
+      "Satu hal apa yang ingin kamu syukuri dari pasanganmu malam ini?"
+    ],
+    dare: [
+      "Pijat kaki pasanganmu dengan lembut selama 2 menit, sambil menanyakan harinya.",
+      "Buatkan pasanganmu minuman hangat favoritnya, lalu temani ia istirahat tanpa gangguan.",
+      "Tulis satu surat pendek untuk pasanganmu tentang betapa bangganya kamu padanya, lalu bacakan.",
+      "Peluk pasanganmu dari samping selama 1 menit, tanpa buru-buru dan tanpa banyak bicara.",
+      "Ceritakan satu mimpi indah tentang keluarga kalian, lalu tanya pasanganmu mimpi versi dia.",
+      "Siapkan satu sudut nyaman buat pasanganmu istirahat, lengkap dengan bantal dan selimut favoritnya.",
+      "Genggam tangan pasanganmu dan sebutkan tiga hal yang kamu kagumi darinya sebagai calon orang tua.",
+      "Ajak pasanganmu memilih satu nama panggilan manis untuk si kecil, cuma buat berdua dulu."
+    ]
+  },
+  anniversary: {
+    label: "Anniversary",
+    truth: [
+      "Momen di tahun ini apa yang paling bikin kamu bangga dengan hubungan kalian?",
+      "Apa hal yang berubah dari pasanganmu ke arah yang lebih baik, menurut kamu?",
+      "Kalau mengulang satu hari di tahun ini, hari apa yang kamu pilih?",
+      "Apa janji yang ingin kamu perbarui untuk tahun depan?",
+      "Apa hal kecil yang pasanganmu lakukan tahun ini dan diam-diam selalu kamu ingat?",
+      "Apa yang paling kamu syukuri dari pasanganmu di tahun ini?",
+      "Momen sulit apa yang justru bikin kalian makin dekat, versi kamu?",
+      "Apa harapanmu untuk hubungan kalian di anniversary berikutnya?"
+    ],
+    dare: [
+      "Tulis satu surat anniversary pendek untuk pasanganmu, lalu bacakan dengan pelan.",
+      "Rencanakan satu kencan anniversary sederhana minggu ini, dari tempat sampai camilannya.",
+      "Tatap pasanganmu dan sebutkan satu hal yang kamu cintai darinya di setiap tahun yang sudah lewat, sebisamu.",
+      "Buat daftar tiga kenangan favorit kalian tahun ini, lalu ceritakan satu yang paling berkesan.",
+      "Peluk pasanganmu lama, seperti merayakan ulang tahun hubungan kalian.",
+      "Buatkan pasanganmu hidangan favoritnya malam ini, sebagai hadiah anniversary kecil.",
+      "Ajak pasanganmu berdansa pelan, seperti di awal kalian bertemu.",
+      "Bisikkan satu harapanmu untuk tahun depan, lalu minta pasanganmu membisikkan harapannya juga."
+    ]
+  },
+  liburan: {
+    label: "Liburan",
+    truth: [
+      "Liburan berdua seperti apa yang paling kamu rindukan, pantai, gunung, atau kota yang ramai?",
+      "Apa momen perjalanan yang paling bikin kamu tertawa sampai sekarang?",
+      "Kalau kalian liburan tanpa rencana sama sekali, hal pertama apa yang ingin kamu lakukan?",
+      "Apa yang paling kamu suka dari pasanganmu saat kalian lagi tersesat atau rencananya berantakan?",
+      "Satu tempat apa yang ingin kamu kunjungi berdua, dan kenapa tempat itu?",
+      "Apa makanan perjalanan yang paling berkesan buat kamu?",
+      "Apa yang bikin liburan berdua terasa spesial, tempatnya atau orangnya?",
+      "Kenangan perjalanan apa yang ingin kamu ulang persis sama, tanpa diubah?"
+    ],
+    dare: [
+      "Rencanakan liburan impian kalian dalam 2 menit, bergantian menambahkan satu detail, sampai rencananya jadi.",
+      "Tunjukkan satu foto liburan kalian, lalu ceritakan momen di balik foto itu.",
+      "Ajak pasanganmu jalan santai keliling rumah sambil pura-pura lagi jalan-jalan di kota impian kalian.",
+      "Buatkan pasanganmu camilan khas tempat liburan impian kalian, sebisa yang ada di rumah.",
+      "Tulis daftar tiga barang wajib liburan versi kamu, lalu bandingkan dengan versi pasanganmu.",
+      "Peluk pasanganmu dan ceritakan satu tempat yang ingin kamu datangi berdua tahun ini.",
+      "Mainkan peran jadi pemandu wisata, dan ajak pasanganmu tur keliling rumah dengan cerita karanganmu.",
+      "Bisikkan satu rencana liburan dadakan, lalu tanya pasanganmu: berangkat minggu ini?"
+    ]
+  },
+  ranjang: {
+    label: "Ranjang (Pasutri)",
+    truth: [
+      "Apa yang bikin kamu merasa paling diinginkan saat berdua di kamar, tanpa buru-buru?",
+      "Momen berdua di ranjang apa yang paling kamu ingat karena terasa hangat dan dekat, bukan karena heboh?",
+      "Apa hal kecil yang pasanganmu lakukan sebelum tidur dan diam-diam selalu kamu tunggu?",
+      "Kalau malam ini cuma boleh satu permintaan manis di kamar, kamu minta apa?",
+      "Apa yang membuatmu merasa paling aman dan dicintai saat berpelukan lama?",
+      "Apa pujian paling menggoda tapi sopan yang paling kamu suka dengar dari pasanganmu?",
+      "Malam berdua ideal versi kamu itu lebih banyak ngobrol, tertawa, diam berpelukan, atau berdansa pelan?",
+      "Apa yang ingin kamu coba bersama pasanganmu di kamar, dalam batas yang kalian berdua nyaman?"
+    ],
+    dare: [
+      "Peluk pasanganmu lama di ranjang, tanpa buru-buru dan tanpa banyak bicara.",
+      "Bisikkan satu rayuan gombal di telinga pasanganmu, pelan-pelan, lalu lihat reaksinya.",
+      "Tatap mata pasanganmu dari dekat selama 30 detik, tanpa tertawa dan tanpa mengalihkan pandangan.",
+      "Pijat bahu dan punggung pasanganmu dengan lembut selama 2 menit.",
+      "Cium kening lalu pipi pasanganmu, pelan-pelan, sambil bilang kenapa kamu bersyukur memilikinya.",
+      "Genggam tangan pasanganmu di bawah selimut, lalu ceritakan satu kenangan manis kalian.",
+      "Buat suasana kamar jadi lebih romantis dengan lampu temaram dan satu lagu pelan, lalu ajak pasanganmu berdansa pelan.",
+      "Tulis satu kalimat manis di telapak tangan pasanganmu, lalu minta ia menebak maksudnya."
+    ]
+  },
+  politik: {
+    label: "Deep Talk: Politik",
+    truth: [
+      "Nilai politik apa yang paling penting buat kamu, dan kenapa nilai itu penting?",
+      "Apa isu publik yang paling bikin kamu peduli belakangan ini, dan apa alasannya?",
+      "Bagaimana kamu ingin pasanganmu menyikapi perbedaan pendapat politik di antara kalian?",
+      "Apa yang kamu harapkan dari pemimpin yang baik, dalam tiga kata versi kamu?",
+      "Pernahkah pendapat politikmu berubah karena diskusi dengan seseorang? Ceritakan.",
+      "Seberapa penting buat kamu pasanganmu ikut peduli soal isu publik, bukan cuma ikut-ikutan?",
+      "Apa batas yang kamu pegang saat berdebat soal politik, supaya tidak merusak hubungan?",
+      "Kalau kalian berbeda pilihan politik, apa yang membuat kalian tetap saling menghormati?"
+    ],
+    dare: [
+      "Jelaskan pendapatmu soal satu isu publik selama 2 menit, tanpa disela pasanganmu.",
+      "Dengarkan pendapat pasanganmu soal satu isu selama 2 menit, tanpa menyela, lalu rangkum dengan bahasamu sendiri.",
+      "Tulis tiga nilai yang kalian berdua sepakati soal kepemimpinan yang baik, lalu bandingkan.",
+      "Ceritakan satu berita yang bikin kamu berpikir ulang, dan apa yang berubah dari pandanganmu.",
+      "Mainkan peran: kamu membela pendapat yang berlawanan dengan pendapatmu selama 1 menit, dengan serius.",
+      "Sebutkan satu hal yang kamu kagumi dari cara pasanganmu berpikir soal isu publik.",
+      "Buat daftar tiga hal yang kalian sepakati, walau kalian berbeda pilihan, lalu bacakan.",
+      "Tanya pasanganmu: isu apa yang ia ingin kalian pelajari bersama, dan kenapa?"
+    ]
+  },
+  ekonomi: {
+    label: "Deep Talk: Ekonomi",
+    truth: [
+      "Apa kebiasaan keuanganmu yang paling kamu banggakan, dan yang paling ingin kamu perbaiki?",
+      "Bagaimana kamu membayangkan pembagian keuangan yang adil di rumah tangga nanti?",
+      "Apa tujuan keuangan jangka pendek kalian yang paling realistis tahun ini?",
+      "Apa yang membuatmu merasa aman secara finansial, tabungan, penghasilan stabil, atau bebas utang?",
+      "Pernahkah kamu menyesal soal satu keputusan belanja? Apa pelajarannya?",
+      "Seberapa terbuka kamu soal gaji dan utang dengan pasangan, dan kenapa?",
+      "Apa definisi hidup cukup versi kamu, dan apa yang membedakannya dengan hidup mewah?",
+      "Kalau kalian dapat uang tambahan mendadak, apa prioritas pertama yang kamu usulkan?"
+    ],
+    dare: [
+      "Buat anggaran mingguan impian kalian dalam 3 menit, bergantian menambahkan satu pos.",
+      "Ceritakan satu kebiasaan belanja impulsifmu, lalu minta pasanganmu memberi satu saran tanpa menghakimi.",
+      "Tulis tiga tujuan keuangan kalian, urutkan dari yang paling penting, lalu bandingkan urutannya.",
+      "Jelaskan dengan bahasamu sendiri bedanya kebutuhan dan keinginan, pakai satu contoh dari hidupmu.",
+      "Rencanakan satu kencan hemat yang tetap romantis, dengan anggaran yang kalian sepakati.",
+      "Sebutkan satu hal yang kamu rela hemat demi tujuan bersama, dan satu hal yang tidak kamu rela hemat.",
+      "Buat daftar tiga pengeluaran yang bisa dipangkas tanpa mengurangi kualitas hidup kalian.",
+      "Tanya pasanganmu: apa ketakutan finansial terbesarnya, dan bagaimana kalian bisa menghadapinya bersama?"
+    ]
+  },
+  agama: {
+    label: "Deep Talk: Agama",
+    truth: [
+      "Nilai spiritual apa yang paling membentuk cara kamu memperlakukan orang lain?",
+      "Apa tradisi atau kebiasaan spiritual keluarga yang paling berkesan buat kamu?",
+      "Bagaimana kamu ingin pasanganmu menghormati keyakinanmu, walau mungkin berbeda?",
+      "Apa yang membuatmu merasa tenang secara batin di hari yang berat?",
+      "Pernahkah keyakinanmu membantumu melewati masa sulit? Ceritakan tanpa harus menggurui.",
+      "Apa yang kamu harapkan soal nilai dan spiritualitas di keluarga kalian nanti?",
+      "Bagaimana kamu menyikapi perbedaan keyakinan dengan orang lain, tanpa merendahkan?",
+      "Apa satu doa atau harapan yang paling sering kamu panjatkan untuk pasanganmu?"
+    ],
+    dare: [
+      "Ceritakan satu nilai dari keyakinanmu yang ingin kamu wariskan, dengan bahasamu sendiri.",
+      "Dengarkan cerita spiritual pasanganmu selama 2 menit, tanpa menyela dan tanpa menilai.",
+      "Tulis tiga nilai yang kalian berdua sepakati soal kebaikan, lalu bacakan.",
+      "Sebutkan satu hal yang kamu kagumi dari cara pasanganmu menjalani keyakinannya.",
+      "Rencanakan satu kebiasaan baik bersama yang selaras dengan nilai kalian, misal bersyukur tiap malam.",
+      "Ceritakan satu momen ketika kamu merasa bersyukur, dan apa yang memicunya.",
+      "Tanya pasanganmu: tradisi apa yang ia ingin kalian jaga bersama, dan kenapa?",
+      "Buat daftar tiga cara kalian bisa saling mendukung secara spiritual, tanpa memaksa."
+    ]
+  },
+  "masa-depan": {
+    label: "Deep Talk: Masa Depan",
+    truth: [
+      "Lima tahun lagi, hidup seperti apa yang kamu bayangkan untuk kalian berdua?",
+      "Apa impian karier atau usahamu yang paling ingin kamu kejar, dan apa yang kamu butuhkan dari pasanganmu?",
+      "Di kota atau suasana seperti apa kamu ingin tinggal nanti, dan kenapa?",
+      "Apa yang paling kamu takutkan soal masa depan, dan apa yang membuatmu tetap optimis?",
+      "Kalau kalian harus memilih antara karier, keluarga, dan kebebasan, mana yang kamu utamakan sekarang?",
+      "Apa definisi sukses versi kamu, dan apakah definisi itu berubah seiring waktu?",
+      "Apa yang ingin kamu capai bersama pasanganmu, bukan sendiri-sendiri?",
+      "Kalau suatu hari rencana kalian berubah total, bagaimana kamu ingin kalian menghadapinya?"
+    ],
+    dare: [
+      "Tulis rencana lima tahun kalian dalam 3 menit, bergantian menambahkan satu mimpi.",
+      "Ceritakan satu impian yang belum pernah kamu ceritakan ke siapa pun, lalu minta pasanganmu menanggapinya.",
+      "Buat daftar tiga langkah kecil menuju impian kalian yang bisa dimulai minggu ini.",
+      "Jelaskan impian pasanganmu dengan bahasamu sendiri, lalu minta ia mengoreksi kalau ada yang salah.",
+      "Rencanakan satu hari ideal di masa depan kalian, dari pagi sampai malam, sedetail mungkin.",
+      "Sebutkan satu hal yang kamu rela korbankan demi masa depan bersama, dan satu hal yang tidak.",
+      "Tanya pasanganmu: apa yang ia butuhkan darimu untuk mengejar impiannya?",
+      "Buat janji kecil bersama untuk satu langkah masa depan, lalu tulis dan simpan."
+    ]
+  },
+  "rumah-tangga": {
+    label: "Deep Talk: Rumah Tangga",
+    truth: [
+      "Pembagian tugas rumah tangga seperti apa yang terasa adil buat kamu?",
+      "Apa hal kecil di rumah yang paling bikin kamu merasa dicintai?",
+      "Bagaimana kamu ingin kalian menyelesaikan konflik di rumah, tanpa saling diam berkepanjangan?",
+      "Apa kebiasaan pasanganmu di rumah yang paling kamu syukuri, dan yang paling menguji kesabaranmu?",
+      "Rumah ideal versi kamu itu rapi total, hangat dan santai, atau campuran keduanya?",
+      "Apa yang paling penting buat kamu soal cara membesarkan anak, kalau nanti kalian punya anak?",
+      "Bagaimana kamu ingin kalian menjaga waktu berdua, di tengah kesibukan rumah?",
+      "Apa yang membuatmu merasa dihargai sebagai pasangan di rumah, bukan cuma sebagai rekan tugas?"
+    ],
+    dare: [
+      "Buat daftar tugas rumah mingguan kalian, lalu bagi dengan adil dalam 3 menit.",
+      "Ceritakan satu hal yang kamu ingin pasanganmu lebih pahami soal beban di rumah, tanpa menyalahkan.",
+      "Rencanakan satu malam tanpa gawai di rumah, lengkap dengan aktivitas penggantinya.",
+      "Sebutkan tiga hal yang kamu syukuri dari pasanganmu soal urusan rumah.",
+      "Buat aturan kecil bersama soal konflik, misal tidak tidur dalam keadaan marah, lalu sepakati.",
+      "Tulis satu kebiasaan baru yang ingin kalian mulai di rumah, lalu mulai malam ini juga.",
+      "Ajak pasanganmu merapikan satu sudut rumah bersama selama 5 menit, sambil ngobrol.",
+      "Tanya pasanganmu: apa satu hal yang bisa kamu lakukan minggu ini untuk meringankan harinya?"
+    ]
+  }
+};
+
+// ---------- State ----------
+let step = [-1,-1];
+let turn = 0;
+let unlocked = localStorage.getItem("ludoberdua_unlock") === "1";
+let gameOver = false;
+let animating = false;
+let selectedTopic = "semua";
+let movingPawn = -1;
+let demoCardCount = 0;
+
+// ---------- Audio (Web Audio, tanpa file eksternal) ----------
+let audioCtx = null, musicOn = true, sfxOn = true, musicTimer = null, musicStep = 0;
+function ensureAudio(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+  }catch(e){}
+}
+function tone(freq, dur, type, vol, delay){
+  if(!audioCtx || !sfxOn) return;
+  try{
+    const t = audioCtx.currentTime + (delay || 0);
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type || "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }catch(e){}
+}
+function playClick(){ ensureAudio(); tone(660, 0.08, "sine", 0.08); }
+function playDiceRattle(){
+  ensureAudio();
+  for(let i=0;i<7;i++) tone(180 + Math.random()*300, 0.05, "square", 0.04, i*0.14);
+  tone(220, 0.15, "sine", 0.12, 1.05);
+}
+function playHop(){ tone(520, 0.12, "sine", 0.12); }
+function playHeart(){ tone(880, 0.25, "sine", 0.12); tone(1318, 0.35, "sine", 0.10, 0.15); }
+function playWin(){ [523,659,784,1047].forEach((f,i)=>tone(f, 0.4, "triangle", 0.14, i*0.18)); }
+function playCard(){ tone(740, 0.2, "sine", 0.10); tone(988, 0.25, "sine", 0.08, 0.12); }
+function startMusic(){
+  if(musicTimer) return;
+  const chords = [[261.6,329.6,392.0],[220.0,261.6,329.6],[174.6,220.0,261.6],[196.0,246.9,293.7]];
+  const melody = [523.3,587.3,659.3,784.0,659.3,587.3];
+  musicTimer = setInterval(()=>{
+    if(!musicOn || !audioCtx) return;
+    const chord = chords[musicStep % chords.length];
+    chord.forEach(f=>tone(f, 2.2, "triangle", 0.035));
+    if(musicStep % 2 === 0) tone(melody[musicStep % melody.length], 1.2, "sine", 0.03, 0.6);
+    musicStep++;
+  }, 2400);
+}
+function toggleMusic(){
+  ensureAudio(); musicOn = !musicOn;
+  document.getElementById("musicBtn").textContent = "Musik: " + (musicOn ? "Nyala" : "Mati");
+  if(musicOn) startMusic();
+}
+function toggleSfx(){
+  ensureAudio(); sfxOn = !sfxOn;
+  document.getElementById("sfxBtn").textContent = "Suara: " + (sfxOn ? "Nyala" : "Mati");
+}
+
+// ---------- Helpers ----------
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+function names(){ return [document.getElementById("name1").value.trim() || "Pemain 1", document.getElementById("name2").value.trim() || "Pemain 2"]; }
+function key(r,c){ return r + "," + c; }
+function posCoord(p){
+  const s = step[p];
+  if(s === -1) return BASE_PAWN[p];
+  if(s < 52) return TRACK[(START[p] + s) % 52];
+  if(s < WIN_STEP) return HOME[p][s - 52];
+  return WIN_CELL;
+}
+function absTrackIdx(p){
+  const s = step[p];
+  if(s < 0 || s >= 52) return -1;
+  return (START[p] + s) % 52;
+}
+function updateTurnUI(){
+  const banner = document.getElementById("turnBanner");
+  banner.className = "p" + (turn+1) + " pulse";
+  banner.innerHTML = "♥ Giliran " + names()[turn] + "<div class=\"sub\">" + (turn===0 ? "Pion merah muda jalan" : "Pion hijau tosca jalan") + "</div>";
+  document.getElementById("name1").className = turn===0 ? "active1" : "";
+  document.getElementById("name2").className = turn===1 ? "active2" : "";
+  const home = step.map(s => s===-1 ? "di home" : (s===WIN_STEP ? "sampai!" : "langkah " + s)).join(" · ");
+  document.getElementById("status").textContent = gameOver ? "Permainan selesai" : "Giliran: " + names()[turn] + "  (" + home + ")";
+}
+function updateUnlockUI(){
+  document.getElementById("unlockStatus").innerHTML = unlocked ? "Mode: <b>Deck Lengkap terbuka ♥</b> — pilih topik di bawah." : "Mode: <b>Demo gratis</b> — 1 topik ringan saja.";
+  document.querySelectorAll(".topicBtn").forEach(b=>{
+    const t = b.getAttribute("data-topic");
+    b.classList.toggle("active", unlocked && selectedTopic === t);
+    b.classList.toggle("locked", !unlocked);
+    b.textContent = b.textContent.replace(" 🔒","").replace(" ✓","");
+    if(!unlocked) b.textContent += " 🔒";
+    else if(selectedTopic === t) b.textContent += " ✓";
+  });
+  document.getElementById("topicNote").textContent = unlocked
+    ? "Berbayar = bisa pilih topik spesifik (Umum, Honeymoon, Kehamilan, Anniversary, Liburan, Ranjang khusus pasutri, plus Deep Talk: Politik, Ekonomi, Agama, Masa Depan, Rumah Tangga) + bank kartu jauh lebih besar. Topik Deep Talk cocok buat PDKT / menuju serius. Pilih Semua Topik untuk kartu acak dari semua topik."
+    : "Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.";
+}
+function selectTopic(t){
+  if(!unlocked){
+    alert("Topik ini hanya untuk deck lengkap. Buka dulu dengan kode akses.");
+    return;
+  }
+  selectedTopic = t; playClick(); updateUnlockUI();
+}
+function renderBoard(){
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  const trackMap = {};
+  TRACK.forEach((rc,i)=>{ trackMap[key(rc[0],rc[1])] = i; });
+  const homeMap = {};
+  HOME[0].forEach(rc=>{ homeMap[key(rc[0],rc[1])] = "home1"; });
+  HOME[1].forEach(rc=>{ homeMap[key(rc[0],rc[1])] = "home2"; });
+  const unusedHome = new Set(["1,7","2,7","3,7","4,7","5,7","7,9","7,10","7,11","7,12","7,13"]);
+  for(let r=0;r<15;r++){
+    for(let c=0;c<15;c++){
+      const cell = document.createElement("div");
+      let cls = "cell", label = "";
+      const k = key(r,c);
+      const isBase1 = r<6 && c<6, isBase2 = r>=9 && c>=9, isBaseX = (r<6 && c>=9) || (r>=9 && c<6);
+      const isInner1 = r>=1 && r<=4 && c>=1 && c<=4;
+      const isInner2 = r>=10 && r<=13 && c>=10 && c<=13;
+      const isInnerX1 = r>=1 && r<=4 && c>=10 && c<=13;
+      const isInnerX2 = r>=10 && r<=13 && c>=1 && c<=4;
+      if(isBase1) cls += " base1";
+      else if(isBase2) cls += " base2";
+      else if(isBaseX) cls += " baseX";
+      if(isInner1 || isInner2 || isInnerX1 || isInnerX2) cls += " baseInner";
+      if(r>=6 && r<=8 && c>=6 && c<=8) cls += " center";
+      if(k === key(WIN_CELL[0],WIN_CELL[1])) label = "♥";
+      if(trackMap[k] !== undefined){
+        if(TRUTH_IDX.has(trackMap[k])){ cls += " cellTruth"; label = "💬"; }
+        else if(DARE_IDX.has(trackMap[k])){ cls += " cellDare"; label = "⚡"; }
+        if(trackMap[k] === START[0]){ cls += " start1"; label = "★"; }
+        if(trackMap[k] === START[1]){ cls += " start2"; label = "★"; }
+      }
+      if(homeMap[k]) cls += " " + homeMap[k];
+      if(unusedHome.has(k)) cls += " homeX";
+      cell.className = cls;
+      cell.innerHTML = label ? "<span>" + label + "</span>" : "";
+      const coord = [r,c];
+      [0,1].forEach(p=>{
+        const pc = posCoord(p);
+        if(pc[0]===r && pc[1]===c){
+          const tok = document.createElement("span");
+          tok.className = "tok p" + (p+1) + (movingPawn===p ? " hopping" : "");
+          tok.textContent = (p+1);
+          cell.appendChild(tok);
+        }
+      });
+      board.appendChild(cell);
+    }
+  }
+  updateTurnUI();
+}
+function enterGame(){
+  ensureAudio(); startMusic();
+  document.getElementById("gate").style.display = "none";
+  updateUnlockUI(); renderBoard();
+}
+function unlockFull(){
+  ensureAudio(); playClick();
+  const code = document.getElementById("codeInput").value.trim().toUpperCase();
+  if(code === "BERDUA"){
+    unlocked = true; localStorage.setItem("ludoberdua_unlock","1");
+    selectedTopic = "semua"; updateUnlockUI(); renderBoard();
+    alert("Deck Lengkap terbuka. Sekarang kamu bisa pilih topik: Umum, Honeymoon, Kehamilan, Anniversary, atau Liburan.");
+  } else {
+    alert("Kode belum cocok. Coba lagi, atau beli akses lewat Lynk saat sudah launching.");
+  }
+}
+async function rollDice(){
+  if(gameOver || animating) return;
+  animating = true;
+  ensureAudio();
+  document.getElementById("rollBtn").disabled = true;
+  // 1) Animasi kocok dadu 1-2 detik, pop-up dadu dikocok
+  const overlay = document.getElementById("diceOverlay");
+  const big = document.getElementById("bigDice");
+  overlay.style.display = "flex";
+  playDiceRattle();
+  const cycle = setInterval(()=>{ big.textContent = DICE_FACES[1 + Math.floor(Math.random()*6)]; }, 120);
+  await sleep(1400);
+  clearInterval(cycle);
+  const d = 1 + Math.floor(Math.random()*6);
+  big.textContent = DICE_FACES[d];
+  document.getElementById("dice").textContent = DICE_FACES[d];
+  await sleep(350);
+  overlay.style.display = "none";
+  const nm = names()[turn];
+  const cur = step[turn];
+  const target = (cur === -1) ? d - 1 : cur + d;
+  if(target > WIN_STEP){
+    document.getElementById("log").textContent = nm + " dapat " + d + ", tapi butuh angka pas untuk sampai rumah. Tetap di tempat.";
+    if(d !== 6) turn = 1 - turn;
+    else document.getElementById("log").textContent += " Dapat 6, lempar lagi!";
+    renderBoard(); animating = false;
+    document.getElementById("rollBtn").disabled = false;
+    return;
+  }
+  // 2) Pion melompat kotak per kotak, satu per satu
+  movingPawn = turn;
+  let s = cur;
+  const stepsToMove = (cur === -1) ? d : d;
+  for(let i=0;i<stepsToMove;i++){
+    s = (cur === -1) ? i : cur + i + 1;
+    // untuk pion dari home: langkah pertama = 0, dst.
+    if(cur === -1) s = i;
+    else s = cur + i + 1;
+    step[turn] = s;
+    playHop();
+    renderBoard();
+    await sleep(300);
+  }
+  movingPawn = -1;
+  step[turn] = target;
+  renderBoard();
+  document.getElementById("log").textContent = nm + " dapat " + d + ", maju ke langkah " + target + ".";
+  if(target === WIN_STEP){
+    gameOver = true; playWin(); renderBoard();
+    document.getElementById("winText").textContent = "Selamat, " + nm + "!";
+    document.getElementById("winOverlay").style.display = "flex";
+    animating = false; document.getElementById("rollBtn").disabled = false;
+    return;
+  }
+  // Demo dopamine: 1-2 kocok pertama langsung dapat kartu, Truth dulu lalu Dare,
+  // supaya pemain langsung merasakan isi gamenya, bukan cuma lempar dadu kosong.
+  if(!unlocked && demoCardCount < 2){
+    demoCardCount++;
+    playHeart(); openCard(demoCardCount === 1 ? "truth" : "dare");
+    animating = false; document.getElementById("rollBtn").disabled = false;
+    return;
+  }
+  const landedIdx = absTrackIdx(turn);
+  if(TRUTH_IDX.has(landedIdx) || DARE_IDX.has(landedIdx)){
+    playHeart(); openCard(TRUTH_IDX.has(landedIdx) ? "truth" : "dare");
+    animating = false; document.getElementById("rollBtn").disabled = false;
+    return;
+  }
+  if(d === 6){
+    document.getElementById("log").textContent += " Dapat 6, lempar lagi!";
+  } else {
+    turn = 1 - turn;
+  }
+  renderBoard();
+  animating = false; document.getElementById("rollBtn").disabled = false;
+}
+function openCard(kind){
+  playCard();
+  const isTruth = kind === "truth";
+  document.getElementById("cardTitle").textContent = (isTruth ? "Kartu Truth 💬 — " : "Kartu Dare ⚡ — ") + names()[turn];
+  document.getElementById("cardPrompt").textContent = (isTruth ? "Truth" : "Dare") + " — " + topicLabel() + ". Jawab / lakukan dengan jujur dan saling menghormati.";
+  // Kartu langsung keluar, tanpa pilih Truth/Dare lagi, karena selnya sudah dibedakan.
+  showCard(kind);
+  document.getElementById("cardOverlay").style.display = "flex";
+}
+function currentDeck(kind){
+  if(!unlocked) return demo[kind];
+  if(selectedTopic === "semua"){
+    let all = [];
+    Object.values(TOPICS).forEach(t=>{ all = all.concat(t[kind]); });
+    return all;
+  }
+  return TOPICS[selectedTopic][kind];
+}
+function topicLabel(){
+  if(!unlocked) return "Demo";
+  return selectedTopic === "semua" ? "Semua Topik" : TOPICS[selectedTopic].label;
+}
+function showCard(kind){
+  playClick();
+  const deck = currentDeck(kind);
+  const text = deck[Math.floor(Math.random()*deck.length)];
+  document.getElementById("cardPrompt").textContent = (kind === "truth" ? "Truth" : "Dare") + " — " + topicLabel();
+  document.getElementById("cardText").textContent = text;
+  document.getElementById("choiceBtns").style.display = "none";
+  document.getElementById("doneBtn").style.display = "inline-block";
+}
+function closeCard(){
+  playClick();
+  document.getElementById("cardOverlay").style.display = "none";
+  turn = 1 - turn;
+  renderBoard();
+}
+function resetGame(){
+  step = [-1,-1]; turn = 0; gameOver = false; animating = false; movingPawn = -1; demoCardCount = 0;
+  document.getElementById("winOverlay").style.display = "none";
+  document.getElementById("cardOverlay").style.display = "none";
+  document.getElementById("diceOverlay").style.display = "none";
+  document.getElementById("dice").textContent = "🎲";
+  document.getElementById("rollBtn").disabled = false;
+  document.getElementById("log").textContent = "Permainan baru. Lempar dadu untuk mulai.";
+  updateUnlockUI(); renderBoard();
+}
+updateUnlockUI(); renderBoard();
+</script>
+</body>
+</html>
