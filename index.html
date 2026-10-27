@@ -112,7 +112,7 @@
         <input id="codeInput" type="text" placeholder="Masukkan kode akses Lynk">
         <button class="teal" onclick="unlockFull()">Buka Deck Lengkap</button>
       </div>
-      <p class="small">Kode uji coba prototipe ini: <b>BERDUA</b> (ganti dengan daftar kode Lynk sebelum launching).</p>
+      <p class="small">Deck lengkap terkunci. Kode akses akan dikirim setelah pembelian, penjualan belum dibuka.</p>
     </div>
   </div>
 </main>
@@ -476,7 +476,7 @@ const TOPICS = {
 // ---------- State ----------
 let step = [-1,-1];
 let turn = 0;
-let unlocked = localStorage.getItem("ludoberdua_unlock") === "1";
+let unlocked = localStorage.getItem("ludoberdua_unlock_v2") === "1";
 let gameOver = false;
 let animating = false;
 let selectedTopic = "semua";
@@ -652,12 +652,11 @@ function enterGame(){
 function unlockFull(){
   ensureAudio(); playClick();
   const code = document.getElementById("codeInput").value.trim().toUpperCase();
-  if(code === "BERDUA"){
-    unlocked = true; localStorage.setItem("ludoberdua_unlock","1");
-    selectedTopic = "semua"; updateUnlockUI(); renderBoard();
-    alert("Deck Lengkap terbuka. Sekarang kamu bisa pilih topik: Umum, Honeymoon, Kehamilan, Anniversary, atau Liburan.");
+  // Kode akses asli dari pembelian akan ditambahkan di sini saat penjualan dibuka.
+  if(code){
+    alert("Deck lengkap belum dibuka untuk penjualan. Kode akses akan dikirim setelah pembelian.");
   } else {
-    alert("Kode belum cocok. Coba lagi, atau beli akses lewat Lynk saat sudah launching.");
+    alert("Masukkan kode akses dari pembelian untuk membuka deck lengkap.");
   }
 }
 async function rollDice(){
