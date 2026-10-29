@@ -72,17 +72,17 @@
 </head>
 <body>
 <header>
-  <h1>♥ Ludo Berdua</h1>
+  <h1>Ludo Berdua</h1>
   <p>Satu papan, dua hati. Game Truth or Dare untuk pasangan dewasa — pasutri, PDKT, atau menuju serius.</p>
 </header>
 
 <main>
   <div class="card">
     <div class="names">
-      <div><label>Pemain 1 ♥</label><input id="name1" type="text" value="Pemain 1"></div>
-      <div><label>Pemain 2 ♥</label><input id="name2" type="text" value="Pemain 2"></div>
+      <div><label>Pemain 1</label><input id="name1" type="text" value="Pemain 1"></div>
+      <div><label>Pemain 2</label><input id="name2" type="text" value="Pemain 2"></div>
     </div>
-    <div id="turnBanner" class="p1 pulse">♥ Giliran Pemain 1<div class="sub">Pion merah muda jalan dulu</div></div>
+    <div id="turnBanner" class="p1 pulse">Giliran Pemain 1<div class="sub">Pion merah muda jalan dulu</div></div>
     <div id="status">Pion masih di home. Lempar dadu untuk mulai.</div>
     <div id="dice">🎲</div>
     <div class="row" style="justify-content:center">
@@ -90,11 +90,12 @@
       <button class="secondary" onclick="resetGame()">Mulai Ulang</button>
       <button class="secondary" id="musicBtn" onclick="toggleMusic()">Musik: Nyala</button>
       <button class="secondary" id="sfxBtn" onclick="toggleSfx()">Suara: Nyala</button>
+      <button class="secondary" onclick="showRoute()">Cara Main &amp; Rute</button>
     </div>
     <div id="log">Lempar dadu untuk mulai. Mendarat di 💬 = kartu Truth, di ⚡ = kartu Dare.</div>
     <div id="progressBox"><div id="progressText">Perjalanan ke finish: 0 dari 58 langkah</div><div class="progressWrap"><div id="progressFill"></div></div></div>
     <div id="board"></div>
-    <p class="small" style="text-align:center">Cara main, biar nggak bingung: ini Ludo versi pasangan, bukan Ludo King. 1 pion per pemain, tanpa makan pion, fokusnya kartu. Lempar dadu, maju sesuai angka, mendarat di 💬 hijau tosca = kartu Truth, ⚡ merah muda = kartu Dare, langsung dapat kartunya. Finish di tengah, harus angka pas. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat.</p>
+    <p class="small" style="text-align:center">Rute umum, sama seperti Ludo biasa: Home → START ★ → keliling searah jarum jam (52 kotak) → Jalur Home 6 kotak warna pemain → Finish tengah, harus angka pas. 1 pion per pemain, tanpa makan pion, fokusnya kartu. Setiap kotak ganjil = kartu: 26 dari 52 kotak trek (50%), selang-seling 💬 Truth dan ⚡ Dare. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat. Penjelasan lengkap ada di tombol Cara Main &amp; Rute.</p>
     <div id="unlockBox">
       <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>
       <div id="topicRow" class="row" style="justify-content:center;margin:10px 0">
@@ -143,7 +144,7 @@
 
 <div class="overlay" id="cardOverlay" style="display:none">
   <div class="modal">
-    <h2 id="cardTitle">Kotak Hati ♥</h2>
+    <h2 id="cardTitle">Kartu</h2>
     <p id="cardPrompt" class="small">Pilih Truth atau Dare.</p>
     <div class="row" style="justify-content:center" id="choiceBtns">
       <button class="primary" onclick="showCard('truth')">Truth</button>
@@ -158,6 +159,23 @@
   </div>
 </div>
 
+<div class="overlay" id="routeOverlay" style="display:none">
+  <div class="modal">
+    <h2>Cara Main &amp; Rute</h2>
+    <p class="small" style="text-align:left;line-height:1.7">
+      <b>Rute ini rute Ludo umum, bukan rute baru.</b><br>
+      1. Pion mulai di home pojok: Pemain 1 rose kiri atas, Pemain 2 teal kanan bawah.<br>
+      2. Lempar dadu, pion masuk ke kotak START ★.<br>
+      3. Jalan searah jarum jam mengelilingi papan, total 52 kotak trek.<br>
+      4. Mendarat di kotak ganjil = dapat kartu: 💬 hijau tosca = Truth, ⚡ merah muda = Dare, selang-seling. Total 26 kotak kartu dari 52 kotak trek (50%).<br>
+      5. Setelah satu putaran penuh, masuk Jalur Home: 6 kotak warna pemain masing-masing.<br>
+      6. Sampai di tengah (finish) dengan angka pas = menang. Kalau angka lebih, pion tetap di tempat.<br>
+      7. 1 pion per pemain, tanpa makan pion. Dua pojok krem adalah hiasan papan, bukan pemain ketiga dan keempat.<br>
+      8. Kartu boleh dilewati kapan pun, tanpa hukuman.
+    </p>
+    <button class="primary" onclick="closeRoute()">Mengerti, Main Lagi</button>
+  </div>
+</div>
 <div class="overlay" id="winOverlay" style="display:none">
   <div class="modal">
     <h2 id="winText">Selamat!</h2>
@@ -191,8 +209,8 @@ const HOME = [
 ];
 const WIN_CELL = [7,7];
 const BASE_PAWN = [[2,2],[12,12]];
-const TRUTH_IDX = new Set([2,7,13,19,25,31,37,43,49]);
-const DARE_IDX = new Set([4,10,16,22,28,34,40,46,51]);
+const TRUTH_IDX = new Set([1,5,9,13,17,21,25,29,33,37,41,45,49]);
+const DARE_IDX = new Set([3,7,11,15,19,23,27,31,35,39,43,47,51]);
 const HEART_IDX = new Set([...TRUTH_IDX, ...DARE_IDX]);
 const DICE_FACES = ["","⚀","⚁","⚂","⚃","⚄","⚅"];
 const WIN_STEP = 58;
@@ -525,7 +543,7 @@ function updateProgress(){
   const done = cur < 0 ? 0 : cur;
   const pct = Math.round(done / 58 * 100);
   const remain = cur < 0 ? 58 : 58 - cur;
-  el.textContent = gameOver ? "Sampai finish! ♥" : "Perjalanan ke finish: " + done + " dari 58 langkah · sisa " + remain + " langkah · " + pct + "%";
+  el.textContent = gameOver ? "Sampai finish!" : "Perjalanan ke finish: " + done + " dari 58 langkah · sisa " + remain + " langkah · " + pct + "%";
   fill.style.width = pct + "%";
 }
 function pickCard(deck, kind){
@@ -614,7 +632,7 @@ function absTrackIdx(p){
 function updateTurnUI(){
   const banner = document.getElementById("turnBanner");
   banner.className = "p" + (turn+1) + " pulse";
-  banner.innerHTML = "♥ Giliran " + names()[turn] + "<div class=\"sub\">" + (turn===0 ? "Pion merah muda jalan" : "Pion hijau tosca jalan") + "</div>";
+  banner.innerHTML = "Giliran " + names()[turn] + "<div class=\"sub\">" + (turn===0 ? "Pion merah muda jalan" : "Pion hijau tosca jalan") + "</div>";
   document.getElementById("name1").className = turn===0 ? "active1" : "";
   document.getElementById("name2").className = turn===1 ? "active2" : "";
   const home = step.map(s => s===-1 ? "di home" : (s===WIN_STEP ? "sampai!" : "langkah " + s)).join(" · ");
@@ -622,7 +640,7 @@ function updateTurnUI(){
   updateProgress(); saveGame();
 }
 function updateUnlockUI(){
-  document.getElementById("unlockStatus").innerHTML = unlocked ? "Mode: <b>Deck Lengkap terbuka ♥</b> — pilih topik di bawah." : "Mode: <b>Demo gratis</b> — 1 topik ringan saja.";
+  document.getElementById("unlockStatus").innerHTML = unlocked ? "Mode: <b>Deck Lengkap terbuka</b> — pilih topik di bawah." : "Mode: <b>Demo gratis</b> — 1 topik ringan saja.";
   document.querySelectorAll(".topicBtn").forEach(b=>{
     const t = b.getAttribute("data-topic");
     b.classList.toggle("active", unlocked && selectedTopic === t);
@@ -683,7 +701,7 @@ function renderBoard(){
         if(pc[0]===r && pc[1]===c){
           const tok = document.createElement("span");
           tok.className = "tok p" + (p+1) + (movingPawn===p ? " hopping" : "");
-          tok.textContent = "♥";
+          tok.textContent = (p+1);
           cell.appendChild(tok);
         }
       });
@@ -826,6 +844,12 @@ function closeCard(){
   document.getElementById("cardOverlay").style.display = "none";
   turn = 1 - turn;
   renderBoard();
+}
+function showRoute(){
+  document.getElementById("routeOverlay").style.display = "flex";
+}
+function closeRoute(){
+  document.getElementById("routeOverlay").style.display = "none";
 }
 function resetGame(){
   step = [-1,-1]; turn = 0; gameOver = false; animating = false; movingPawn = -1; demoCardCount = 0;
