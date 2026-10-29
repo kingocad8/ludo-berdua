@@ -128,6 +128,12 @@
         <button class="topicBtn locked" data-topic="agama" onclick="selectTopic('agama')">Agama 🔒</button>
         <button class="topicBtn locked" data-topic="masa-depan" onclick="selectTopic('masa-depan')">Masa Depan 🔒</button>
         <button class="topicBtn locked" data-topic="rumah-tangga" onclick="selectTopic('rumah-tangga')">Rumah Tangga 🔒</button>
+        <button class="topicBtn locked" data-topic="anak" onclick="selectTopic('anak')">Anak & Parenting 🔒</button>
+        <button class="topicBtn locked" data-topic="mertua" onclick="selectTopic('mertua')">Mertua & Keluarga Besar 🔒</button>
+        <button class="topicBtn locked" data-topic="komunikasi" onclick="selectTopic('komunikasi')">Komunikasi & Konflik 🔒</button>
+        <button class="topicBtn locked" data-topic="karier" onclick="selectTopic('karier')">Karier & Ambisi 🔒</button>
+        <button class="topicBtn locked" data-topic="persiapan-nikah" onclick="selectTopic('persiapan-nikah')">Persiapan Nikah & PDKT 🔒</button>
+        <button class="topicBtn locked" data-topic="kesehatan" onclick="selectTopic('kesehatan')">Kesehatan & Me Time 🔒</button>
       </div>
       <p class="small" id="topicNote">Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.</p>
       <div class="row" style="justify-content:center">
@@ -508,6 +514,144 @@ const TOPICS = {
       "Tulis satu kebiasaan baru yang ingin kalian mulai di rumah, lalu mulai malam ini juga.",
       "Ajak pasanganmu merapikan satu sudut rumah bersama selama 5 menit, sambil ngobrol.",
       "Tanya pasanganmu: apa satu hal yang bisa kamu lakukan minggu ini untuk meringankan harinya?"
+    ]
+  },
+  anak: {
+    label: "Anak & Parenting",
+    truth: [
+      "Apa hal yang paling bikin kamu bangga melihat pasanganmu sebagai orang tua?",
+      "Momen jadi orang tua apa yang paling menguras tenaga, tapi juga paling berkesan buat kamu?",
+      "Apa yang ingin kamu wariskan ke anak kalian, dari cara kamu dibesarkan dulu?",
+      "Bagaimana kamu ingin kalian tetap berdua, di tengah kesibukan mengurus anak?",
+      "Apa ketakutan terbesarmu soal membesarkan anak, dan apa yang membuatmu tenang soal itu?",
+      "Apa hal kecil yang pasanganmu lakukan buat anak kalian, dan diam-diam bikin kamu jatuh cinta lagi?",
+      "Kalau anak kalian nanti bertanya soal cinta, jawaban seperti apa yang ingin kalian tunjukkan lewat contoh?",
+      "Apa yang paling ingin kamu ubah dari pola asuh yang kamu terima dulu, untuk keluarga kalian?"
+    ],
+    dare: [
+      "Ceritakan satu momen lucu anak kalian, sedetail yang kamu ingat, sampai pasanganmu ikut tertawa.",
+      "Tulis tiga hal yang kamu kagumi dari pasanganmu sebagai orang tua, lalu bacakan.",
+      "Rencanakan satu waktu berdua minggu ini, tanpa anak, walau cuma 30 menit ngobrol santai.",
+      "Genggam tangan pasanganmu dan bilang satu hal yang membuatmu bersyukur berjuang bersama sebagai orang tua.",
+      "Buat daftar tiga aturan rumah yang kalian sepakati untuk anak, lalu bandingkan versimu dengan versi pasanganmu.",
+      "Peluk pasanganmu lama, sebagai hadiah karena sudah begadang dan berjuang bareng.",
+      "Tanya pasanganmu: apa satu hal yang bisa kamu bantu minggu ini, supaya ia bisa istirahat lebih lama?",
+      "Ceritakan satu impianmu untuk anak kalian, lalu minta pasanganmu menambahkan impiannya juga."
+    ]
+  },
+  mertua: {
+    label: "Mertua & Keluarga Besar",
+    truth: [
+      "Tradisi keluarga besar apa yang paling ingin kamu jaga, dan yang paling ingin kamu ubah sedikit?",
+      "Bagaimana kamu ingin pasanganmu membelamu, kalau ada perbedaan pendapat dengan keluarganya?",
+      "Apa batas yang menurut kamu sehat, antara keluarga besar dan ruang berdua kalian?",
+      "Momen keluarga besar apa yang paling berkesan buat kamu, dan kenapa?",
+      "Apa yang paling kamu syukuri dari keluarga pasanganmu?",
+      "Bagaimana kamu ingin kalian membagi waktu libur, antara keluarga masing-masing dan waktu berdua?",
+      "Apa hal yang paling sulit kamu sampaikan ke keluarga besar, dan bagaimana pasanganmu bisa membantumu?",
+      "Apa yang membuatmu merasa diterima sebagai bagian dari keluarga pasanganmu?"
+    ],
+    dare: [
+      "Ceritakan satu kebiasaan baik dari keluarga pasanganmu yang ingin kamu tiru, dengan tulus.",
+      "Tulis tiga cara kalian bisa menghormati orang tua, tanpa kehilangan keputusan berdua, lalu sepakati.",
+      "Sebutkan satu hal yang kamu kagumi dari cara pasanganmu memperlakukan keluarganya.",
+      "Rencanakan satu kunjungan keluarga yang menyenangkan, dari makanan sampai obrolannya.",
+      "Tanya pasanganmu: apa yang ia butuhkan darimu, saat menghadapi keluarganya di situasi sulit?",
+      "Ceritakan satu momen keluarga besar yang bikin kamu tertawa, sedetail yang kamu ingat.",
+      "Buat daftar tiga batasan yang kalian sepakati soal keluarga besar, lalu bacakan dengan tenang.",
+      "Peluk pasanganmu dan bilang satu hal yang membuatmu bersyukur ia ada di tengah keluargamu."
+    ]
+  },
+  komunikasi: {
+    label: "Komunikasi & Konflik",
+    truth: [
+      "Saat marah, apa yang paling kamu butuhkan dari pasanganmu, didengarkan dulu atau dicari solusinya?",
+      "Apa hal yang paling sulit kamu sampaikan ke pasanganmu, dan kenapa sulit?",
+      "Bahasa cinta apa yang paling kamu rasakan, kata-kata, sentuhan, waktu, hadiah, atau bantuan?",
+      "Apa kalimat dari pasanganmu yang paling menenangkanmu saat kalian bertengkar?",
+      "Bagaimana kamu tahu pasanganmu sedang tidak baik-baik saja, walau ia bilang tidak apa-apa?",
+      "Apa kebiasaan komunikasi kalian yang ingin kamu perbaiki, supaya konflik tidak berlarut?",
+      "Kapan terakhir kamu merasa benar-benar didengarkan oleh pasanganmu, dan apa yang ia lakukan saat itu?",
+      "Apa permintaan maaf yang paling berkesan buat kamu, dan kenapa permintaan itu terasa tulus?"
+    ],
+    dare: [
+      "Dengarkan pasanganmu bercerita selama 2 menit, tanpa menyela dan tanpa memberi saran, lalu rangkum dengan bahasamu sendiri.",
+      "Ceritakan satu hal yang mengganjal di hatimu, dengan kalimat aku merasa, bukan kamu selalu.",
+      "Tulis satu permintaan maaf tulus untuk pasanganmu, lalu bacakan dengan pelan.",
+      "Genggam tangan pasanganmu dan sebutkan tiga hal yang kamu hargai dari cara ia berkomunikasi.",
+      "Mainkan peran: kamu jadi pasanganmu selama 1 menit, dan ceritakan harimu dari sudut pandangnya.",
+      "Buat aturan kecil bersama soal bertengkar, misal tidak pergi tidur dalam keadaan marah, lalu sepakati.",
+      "Peluk pasanganmu selama 30 detik, tanpa bicara, sebagai cara bilang aku di sini.",
+      "Tanya pasanganmu: apa satu hal yang bisa kamu lakukan, supaya ia merasa lebih didengarkan?"
+    ]
+  },
+  karier: {
+    label: "Karier & Ambisi",
+    truth: [
+      "Kalau kariermu berubah arah total besok, dukungan seperti apa yang kamu harapkan dari pasanganmu?",
+      "Bagaimana kamu membayangkan dukungan yang adil, saat salah satu dari kalian sedang sibuk-sibuknya kerja?",
+      "Apa yang paling kamu banggakan dari perjalanan karier pasanganmu sejauh ini?",
+      "Kalau kalian harus memilih antara pindah kota demi karier atau bertahan demi kenyamanan, apa yang kamu utamakan?",
+      "Apa ketakutan terbesarmu soal karier, dan bagaimana pasanganmu bisa membantumu menghadapinya?",
+      "Apa definisi sukses versi kamu, dan apakah pasanganmu sepakat dengan definisi itu?",
+      "Bagaimana kamu ingin kalian merayakan pencapaian karier, yang besar maupun yang kecil?",
+      "Apa yang ingin kamu pelajari dari pasanganmu soal kerja keras dan istirahat?"
+    ],
+    dare: [
+      "Ceritakan satu impian kariermu yang belum pernah kamu ceritakan ke siapa pun, lalu minta pasanganmu menanggapinya.",
+      "Tulis tiga langkah kecil menuju impian karier kalian yang bisa dimulai minggu ini, lalu sepakati satu.",
+      "Sebutkan tiga hal yang kamu kagumi dari etos kerja pasanganmu.",
+      "Rencanakan satu malam perayaan kecil untuk pencapaian pasanganmu, dari makanan sampai ucapannya.",
+      "Jelaskan impian karier pasanganmu dengan bahasamu sendiri, lalu minta ia mengoreksi kalau ada yang salah.",
+      "Tanya pasanganmu: apa yang ia butuhkan darimu, supaya ia bisa fokus mengejar impiannya?",
+      "Buat daftar tiga cara kalian bisa saling mendukung saat jam kerja bertabrakan dengan waktu berdua.",
+      "Peluk pasanganmu dan bilang satu hal yang membuatmu bangga padanya, di luar soal uang."
+    ]
+  },
+  "persiapan-nikah": {
+    label: "Persiapan Nikah & PDKT",
+    truth: [
+      "Apa ekspektasi terbesarmu soal pernikahan, yang belum pernah kamu sampaikan ke pasanganmu?",
+      "Apa yang paling membuatmu yakin, atau paling membuatmu ragu, soal melangkah lebih serius?",
+      "Bagaimana kamu membayangkan kehidupan berdua kalian di tahun pertama setelah menikah?",
+      "Apa nilai yang tidak bisa kamu tawar dalam sebuah pernikahan?",
+      "Apa yang paling ingin kamu kenali lebih dalam dari pasanganmu, sebelum melangkah lebih jauh?",
+      "Bagaimana kamu ingin kalian menghadapi perbedaan, saat sudah tidak lagi sekadar pacaran?",
+      "Apa momen PDKT kalian yang paling membuatmu sadar, orang ini serius?",
+      "Apa yang kamu harapkan dari pasanganmu, sebagai teman hidup, bukan cuma sebagai pacar?"
+    ],
+    dare: [
+      "Ceritakan satu hal yang membuatmu jatuh cinta pada pasanganmu di masa PDKT, sedetail yang kamu ingat.",
+      "Tulis tiga janji kecil yang ingin kamu pegang saat melangkah lebih serius, lalu bacakan.",
+      "Tanya pasanganmu: apa yang ia harapkan darimu di tahun pertama pernikahan, dan dengarkan tanpa menyela.",
+      "Rencanakan satu kencan yang terasa seperti awal PDKT, dari tempat sampai obrolannya.",
+      "Sebutkan tiga hal yang kamu syukuri dari proses kenalan kalian sejauh ini.",
+      "Buat daftar tiga hal yang kalian sepakati soal visi hidup, lalu bandingkan versimu dengan versi pasanganmu.",
+      "Genggam tangan pasanganmu dan ceritakan satu harapanmu untuk masa depan kalian, dengan jujur.",
+      "Peluk pasanganmu lama, sebagai cara bilang kamu siap berjuang bareng, selangkah demi selangkah."
+    ]
+  },
+  kesehatan: {
+    label: "Kesehatan & Me Time",
+    truth: [
+      "Apa kebiasaan sehat yang paling ingin kamu mulai bersama pasanganmu, dan kenapa belum dimulai?",
+      "Bagaimana kamu tahu pasanganmu sedang lelah, walau ia bilang masih kuat?",
+      "Apa bentuk me time yang paling membuatmu pulih, dan apakah pasanganmu memahaminya?",
+      "Apa yang paling membuatmu stres belakangan ini, dan apa yang bisa pasanganmu lakukan untuk meringankannya?",
+      "Bagaimana kamu ingin kalian saling mengingatkan soal kesehatan, tanpa terasa menggurui?",
+      "Apa hal kecil yang pasanganmu lakukan, dan diam-diam membuat harimu lebih ringan?",
+      "Tidur seperti apa yang paling membuatmu pulih, dan bagaimana kalian bisa menjaganya bersama?",
+      "Apa yang ingin kamu ubah dari rutinitasmu, supaya kamu bisa lebih hadir buat pasanganmu?"
+    ],
+    dare: [
+      "Pijat bahu pasanganmu dengan lembut selama 2 menit, sambil menanyakan harinya.",
+      "Rencanakan satu aktivitas sehat bersama minggu ini, jalan santai, masak sehat, atau tidur lebih awal.",
+      "Siapkan satu camilan sehat buat pasanganmu, lalu makan bareng tanpa gawai selama 10 menit.",
+      "Tulis tiga cara kalian bisa saling menjaga kesehatan, lalu sepakati satu untuk dimulai besok.",
+      "Ajak pasanganmu tarik napas dalam bersama tiga kali, pelan-pelan, tanpa buru-buru.",
+      "Sebutkan tiga hal yang kamu syukuri dari tubuh dan kesehatan pasanganmu, dengan tulus.",
+      "Rencanakan satu waktu me time untuk pasanganmu minggu ini, dan jaga waktu itu tanpa gangguan.",
+      "Peluk pasanganmu lama, lalu bilang satu hal yang membuatmu bersyukur ia masih sehat dan ada di sampingmu."
     ]
   }
 };
