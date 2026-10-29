@@ -25,8 +25,12 @@
   #turnBanner .sub{font-weight:400;font-size:13px;opacity:.9}
   #turnBanner.pulse{animation:pulse 1s ease-in-out infinite alternate}
   @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.02)}}
-  #board{display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:14px 0;background:#e8d5d9;border:2px solid #e8d5d9;border-radius:12px;overflow:hidden}
-  .cell{min-height:32px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8a767c;position:relative}
+  #board{display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:14px 0;background:#d8c9a8;border:2px solid #c9a86a;border-radius:14px;overflow:hidden}
+  .cell{min-height:34px;background:#fffdf8;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a767c;position:relative}
+  #progressBox{margin:10px 0 2px;text-align:center}
+  #progressText{font-size:13px;font-weight:700;color:#6b5a60}
+  .progressWrap{height:10px;background:#f0d9de;border-radius:99px;overflow:hidden;margin-top:6px}
+  #progressFill{height:100%;width:0%;background:linear-gradient(90deg,var(--rose),var(--teal));transition:width .4s}
   .cell.base1{background:var(--rose)}
   .cell.base2{background:var(--teal)}
   .cell.baseX{background:#e9e2d8}
@@ -40,7 +44,7 @@
   .cell.home2{background:#d5ebe8}
   .cell.homeX{background:#f2efe9}
   .cell.center{background:linear-gradient(135deg,var(--rose),var(--teal));color:#fff;font-weight:800}
-  .tok{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
+  .tok{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
   .p1{background:var(--rose)} .p2{background:var(--teal)}
   .tok.hopping{animation:hop .28s ease}
   @keyframes hop{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.25)}100%{transform:translateY(0) scale(1)}}
@@ -86,11 +90,11 @@
       <button class="secondary" onclick="resetGame()">Mulai Ulang</button>
       <button class="secondary" id="musicBtn" onclick="toggleMusic()">Musik: Nyala</button>
       <button class="secondary" id="sfxBtn" onclick="toggleSfx()">Suara: Nyala</button>
-      <button class="secondary" onclick="testSound()">Tes Suara</button>
     </div>
     <div id="log">Lempar dadu untuk mulai. Mendarat di 💬 = kartu Truth, di ⚡ = kartu Dare.</div>
+    <div id="progressBox"><div id="progressText">Perjalanan ke finish: 0 dari 58 langkah</div><div class="progressWrap"><div id="progressFill"></div></div></div>
     <div id="board"></div>
-    <p class="small" style="text-align:center">Papan Ludo klasik: plus di tengah + 4 kotak home di pojok. 1 pion per pemain, tanpa makan pion, supaya permainan tetap hangat. Kotak 💬 hijau tosca = kartu Truth, kotak ⚡ merah muda = kartu Dare. Mendarat di sana langsung dapat kartunya.</p>
+    <p class="small" style="text-align:center">Cara main, biar nggak bingung: ini Ludo versi pasangan, bukan Ludo King. 1 pion per pemain, tanpa makan pion, fokusnya kartu. Lempar dadu, maju sesuai angka, mendarat di 💬 hijau tosca = kartu Truth, ⚡ merah muda = kartu Dare, langsung dapat kartunya. Finish di tengah, harus angka pas. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat.</p>
     <div id="unlockBox">
       <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>
       <div id="topicRow" class="row" style="justify-content:center;margin:10px 0">
@@ -109,16 +113,16 @@
       </div>
       <p class="small" id="topicNote">Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.</p>
       <div class="row" style="justify-content:center">
-        <input id="codeInput" type="text" placeholder="Masukkan kode akses Lynk">
+        <input id="codeInput" type="text" placeholder="Masukkan kode akses pembelian">
         <button class="teal" onclick="unlockFull()">Buka Deck Lengkap</button>
       </div>
-      <p class="small">Deck lengkap terkunci. Kode akses akan dikirim setelah pembelian, penjualan belum dibuka.</p>
+      <p class="small">Deck lengkap dibuka dengan kode akses yang dikirim penjual setelah pembelian terverifikasi.</p>
     </div>
   </div>
 </main>
 
 <footer>
-  Khusus dewasa 18+ dan dimainkan atas persetujuan bersama. Game ini berjalan lokal di perangkatmu, tidak mengirim data apa pun ke server. Kalau salah satu tidak nyaman dengan sebuah kartu, lewati saja, tanpa hukuman. Musik dan suara dibuat dari Web Audio di perangkatmu, tanpa lagu berlisensi.
+  Khusus dewasa 18+ dan dimainkan atas persetujuan bersama. Game ini berjalan lokal di perangkatmu, tidak mengirim data apa pun ke server. Kalau salah satu tidak nyaman dengan sebuah kartu, lewati saja, tanpa hukuman. Musik dan suara dibuat dari Web Audio di perangkatmu, tanpa lagu berlisensi. Catatan jujur: ini 1 pion per pemain, tanpa makan pion, fokusnya kartu pasangan, bukan turnamen Ludo.
 </footer>
 
 <div class="overlay" id="gate">
@@ -482,6 +486,58 @@ let animating = false;
 let selectedTopic = "semua";
 let movingPawn = -1;
 let demoCardCount = 0;
+let usedCards = {};
+// Kode launch disimpan sebagai hash, bukan teks polos, supaya tidak terbaca dari source halaman.
+const LAUNCH_HASH = "6bc4cc67";
+function hashCode(str){
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(16);
+}
+function saveGame(){
+  try{
+    localStorage.setItem("ludoberdua_save_v1", JSON.stringify({
+      step: step, turn: turn, gameOver: gameOver, demoCardCount: demoCardCount,
+      selectedTopic: selectedTopic,
+      name1: document.getElementById("name1").value, name2: document.getElementById("name2").value
+    }));
+  }catch(e){}
+}
+function restoreGame(){
+  try{
+    const raw = localStorage.getItem("ludoberdua_save_v1");
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s.gameOver) return;
+    if(Array.isArray(s.step) && s.step.length === 2) step = s.step;
+    if(s.turn === 0 || s.turn === 1) turn = s.turn;
+    if(typeof s.demoCardCount === "number") demoCardCount = s.demoCardCount;
+    if(unlocked && typeof s.selectedTopic === "string") selectedTopic = s.selectedTopic;
+    if(typeof s.name1 === "string") document.getElementById("name1").value = s.name1;
+    if(typeof s.name2 === "string") document.getElementById("name2").value = s.name2;
+  }catch(e){}
+}
+function updateProgress(){
+  const el = document.getElementById("progressText");
+  const fill = document.getElementById("progressFill");
+  if(!el || !fill) return;
+  const cur = step[turn];
+  const done = cur < 0 ? 0 : cur;
+  const pct = Math.round(done / 58 * 100);
+  const remain = cur < 0 ? 58 : 58 - cur;
+  el.textContent = gameOver ? "Sampai finish! ♥" : "Perjalanan ke finish: " + done + " dari 58 langkah · sisa " + remain + " langkah · " + pct + "%";
+  fill.style.width = pct + "%";
+}
+function pickCard(deck, kind){
+  const key = (unlocked ? selectedTopic : "demo") + ":" + kind;
+  if(!usedCards[key]) usedCards[key] = new Set();
+  const used = usedCards[key];
+  if(used.size >= deck.length) used.clear();
+  const avail = deck.map((_, i) => i).filter(i => !used.has(i));
+  const idx = avail[Math.floor(Math.random() * avail.length)];
+  used.add(idx);
+  return deck[idx];
+}
 
 // ---------- Audio (Web Audio, tanpa file eksternal) ----------
 let audioCtx = null, musicOn = true, sfxOn = true, musicTimer = null, musicStep = 0;
@@ -515,13 +571,6 @@ function playHop(){ tone(520, 0.12, "sine", 0.20); }
 function playHeart(){ tone(880, 0.25, "sine", 0.20); tone(1318, 0.35, "sine", 0.18, 0.15); }
 function playWin(){ [523,659,784,1047].forEach((f,i)=>tone(f, 0.4, "triangle", 0.20, i*0.18)); }
 function playCard(){ tone(740, 0.2, "sine", 0.18); tone(988, 0.25, "sine", 0.15, 0.12); }
-function testSound(){
-  ensureAudio();
-  if(audioCtx) audioCtx.resume().catch(()=>{});
-  playClick(); playHop(); playHeart();
-  [261.6,329.6,392.0].forEach(f=>tone(f, 1.0, "triangle", 0.09, 0.3));
-  document.getElementById("log").textContent = "Tes suara: kalau ini tidak bunyi juga, cek volume media HP dan mode silent.";
-}
 function startMusic(){
   if(musicTimer) return;
   const chords = [[261.6,329.6,392.0],[220.0,261.6,329.6],[174.6,220.0,261.6],[196.0,246.9,293.7]];
@@ -570,6 +619,7 @@ function updateTurnUI(){
   document.getElementById("name2").className = turn===1 ? "active2" : "";
   const home = step.map(s => s===-1 ? "di home" : (s===WIN_STEP ? "sampai!" : "langkah " + s)).join(" · ");
   document.getElementById("status").textContent = gameOver ? "Permainan selesai" : "Giliran: " + names()[turn] + "  (" + home + ")";
+  updateProgress(); saveGame();
 }
 function updateUnlockUI(){
   document.getElementById("unlockStatus").innerHTML = unlocked ? "Mode: <b>Deck Lengkap terbuka ♥</b> — pilih topik di bawah." : "Mode: <b>Demo gratis</b> — 1 topik ringan saja.";
@@ -633,7 +683,7 @@ function renderBoard(){
         if(pc[0]===r && pc[1]===c){
           const tok = document.createElement("span");
           tok.className = "tok p" + (p+1) + (movingPawn===p ? " hopping" : "");
-          tok.textContent = (p+1);
+          tok.textContent = "♥";
           cell.appendChild(tok);
         }
       });
@@ -652,11 +702,16 @@ function enterGame(){
 function unlockFull(){
   ensureAudio(); playClick();
   const code = document.getElementById("codeInput").value.trim().toUpperCase();
-  // Kode akses asli dari pembelian akan ditambahkan di sini saat penjualan dibuka.
-  if(code){
-    alert("Deck lengkap belum dibuka untuk penjualan. Kode akses akan dikirim setelah pembelian.");
-  } else {
+  if(!code){
     alert("Masukkan kode akses dari pembelian untuk membuka deck lengkap.");
+    return;
+  }
+  if(hashCode(code) === LAUNCH_HASH){
+    unlocked = true; localStorage.setItem("ludoberdua_unlock_v2", "1");
+    selectedTopic = "semua"; updateUnlockUI(); renderBoard();
+    alert("Deck Lengkap terbuka. Sekarang kamu bisa pilih topik dan main dengan bank kartu lengkap.");
+  } else {
+    alert("Kode belum cocok. Periksa lagi kode dari penjual, atau hubungi penjual setelah pembayaran terverifikasi.");
   }
 }
 async function rollDice(){
@@ -760,7 +815,7 @@ function topicLabel(){
 function showCard(kind){
   playClick();
   const deck = currentDeck(kind);
-  const text = deck[Math.floor(Math.random()*deck.length)];
+  const text = pickCard(deck, kind);
   document.getElementById("cardPrompt").textContent = (kind === "truth" ? "Truth" : "Dare") + " — " + topicLabel();
   document.getElementById("cardText").textContent = text;
   document.getElementById("choiceBtns").style.display = "none";
@@ -782,7 +837,7 @@ function resetGame(){
   document.getElementById("log").textContent = "Permainan baru. Lempar dadu untuk mulai.";
   updateUnlockUI(); renderBoard();
 }
-updateUnlockUI(); renderBoard();
+restoreGame(); updateUnlockUI(); renderBoard();
 </script>
 </body>
 </html>
