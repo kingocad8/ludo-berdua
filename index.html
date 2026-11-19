@@ -8,12 +8,24 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#b3405e">
+<!--
+QC UI/UX v14 -> v15 (singkat):
+1. Hierarki: judul, banner giliran, papan, dadu sudah urut benar; judul kurang "premium" -> v15 pakai serif + garis gold.
+2. Papan: datar 2D, tile seragam, kurang kedalaman; home base & finish tidak menonjol -> v15 isometrik CSS 3D (tile timbul, panggung, podium).
+3. Pion: flat; sulit dibedakan dari tile -> v15 radial gradient + bayangan jatuh + hop lebih tinggi.
+4. Tombol HP 390px: Kocok Dadu sudah lebar penuh, input 16px (anti-zoom iOS); desktop OK -> v15 tombol lebih besar + efek tekan.
+5. Alur beli + kode: modal Cara Beli jelas tapi tombol "Buka Deck Lengkap" ada di bawah daftar topik panjang; jalur sudah ada, tidak diubah.
+6. Palet: rose/teal/gold/cream konsisten; abu-abu netral dipakai secukupnya.
+7. Kurang biar layak jual: screenshot/preview papan di halaman jual, ringkasan isi deck di atas lipatan, bukti sosial/testimoni,
+   pembayaran Lynk yang aktif, dan tes nyata di iOS Safari + Android Chrome.
+8. Fallback: transform 3D hanya aktif lewat @supports; layar <=340px kembali ke papan 2D rata.
+-->
 <style>
   :root{--rose:#b3405e;--rose2:#e8a2b0;--cream:#fff7f0;--teal:#0f5e5a;--amber:#d99a2b;--ink:#2b2226}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#fff7f0,#fdeef1 60%,#fff7f0);color:var(--ink)}
   header{padding:14px 16px 4px;text-align:center}
-  h1{margin:0;font-size:34px;color:var(--rose);font-family:Georgia,serif;letter-spacing:1px}
+  h1{margin:0;font-size:34px;color:var(--rose);font-family:Georgia,"Times New Roman",serif;letter-spacing:1px;text-shadow:0 2px 0 #fff,0 4px 10px rgba(179,64,94,.18);display:inline-block;padding-bottom:6px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,transparent,#c9a86a 20%,#e6c98a 50%,#c9a86a 80%,transparent) 1}
   header p{margin:6px 0;color:#6b5a60}
   main{max-width:520px;margin:0 auto;padding:8px 16px 32px}
   .card{background:transparent;border:0;border-radius:16px;padding:8px;box-shadow:none}
@@ -24,24 +36,31 @@
   input[type=text]{font-size:16px}
   .names input.active1{border:2px solid var(--rose)}
   .names input.active2{border:2px solid var(--teal)}
-  #turnBanner{border-radius:20px;padding:12px 14px;text-align:center;font-weight:800;font-size:18px;color:#fff;margin:10px 0;transition:background .3s;box-shadow:0 6px 16px rgba(0,0,0,.12)}
-  #turnBanner.p1{background:var(--rose)}
-  #turnBanner.p2{background:var(--teal)}
+  #turnBanner{border-radius:20px;padding:12px 14px;text-align:center;font-weight:800;font-size:18px;color:#fff;margin:10px 0;transition:background .3s;box-shadow:0 10px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.15);text-shadow:0 1px 2px rgba(0,0,0,.25)}
+  #turnBanner.p1{background:linear-gradient(180deg,#c9566f,var(--rose) 55%,#8f2f48)}
+  #turnBanner.p2{background:linear-gradient(180deg,#1b7d78,var(--teal) 55%,#0a4642)}
   #turnBanner .sub{font-weight:400;font-size:13px;opacity:.9}
   #turnBanner.pulse{animation:pulse 1s ease-in-out infinite alternate}
   @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.02)}}
-  #board{display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:10px 0;background:#c9a86a;border:4px solid #c9a86a;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(179,64,94,.18)}
-  .cell{min-height:30px;background:#fffdf8;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a767c;position:relative}
+  .board3d{position:relative;margin:14px 0 18px;max-width:100%;overflow:visible;perspective:1600px}
+  #board{position:relative;z-index:1;display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:0;background:#a8873f;border:4px solid #c9a86a;border-radius:20px;overflow:hidden;box-shadow:0 14px 28px rgba(60,30,20,.30),0 30px 50px rgba(179,64,94,.18),inset 0 0 0 1px rgba(255,255,255,.4)}
+  @supports (transform:rotateX(1deg)){
+    #board,.board3d::before{transform:rotateX(28deg) scale(.92);transform-origin:center}
+    .board3d::before{content:"";position:absolute;left:0;right:0;top:0;bottom:0;z-index:0;border-radius:22px;background:linear-gradient(180deg,#8a6a3a,#5c4426);box-shadow:0 26px 40px rgba(40,20,20,.35);translate:0 14px}
+  }
+  .cell{min-height:30px;background:#fffdf8;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a767c;position:relative;box-shadow:inset 0 -3px 0 rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.55)}
+  .cell::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(0,0,0,.07));pointer-events:none}
+  .cell>span:not(.tok){position:relative;z-index:1}
   #progressBox{margin:10px 0 2px;text-align:center}
   #progressText{font-size:13px;font-weight:700;color:#6b5a60}
-  .progressWrap{height:10px;background:#f0d9de;border-radius:99px;overflow:hidden;margin-top:6px}
-  #progressFill{height:100%;width:0%;background:linear-gradient(90deg,var(--rose),var(--teal));transition:width .4s}
-  .cell.base1{background:var(--rose)}
-  .cell.base2{background:var(--teal)}
+  .progressWrap{height:12px;background:#f0d9de;border-radius:99px;overflow:hidden;margin-top:6px;box-shadow:inset 0 2px 4px rgba(0,0,0,.15)}
+  #progressFill{height:100%;width:0%;background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0) 55%),linear-gradient(90deg,var(--rose),var(--teal));box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);transition:width .4s}
+  .cell.base1{background:linear-gradient(180deg,#c9566f,var(--rose));box-shadow:inset 0 0 8px rgba(0,0,0,.35),inset 0 -3px 0 rgba(0,0,0,.2)}
+  .cell.base2{background:linear-gradient(180deg,#1b7d78,var(--teal));box-shadow:inset 0 0 8px rgba(0,0,0,.35),inset 0 -3px 0 rgba(0,0,0,.2)}
   .cell.baseX{background:#e9e2d8}
   .cell.baseInner{background:#fffdf8}
-  .cell.base1.baseInner{background:#ffeef2}
-  .cell.base2.baseInner{background:#e0f2f0}
+  .cell.base1.baseInner{background:#ffeef2;box-shadow:inset 0 3px 6px rgba(143,47,72,.35),inset 0 -2px 0 rgba(255,255,255,.6)}
+  .cell.base2.baseInner{background:#e0f2f0;box-shadow:inset 0 3px 6px rgba(10,70,66,.35),inset 0 -2px 0 rgba(255,255,255,.6)}
   .cell.trackHeart{background:#fdeef1}
   .cell.cellTruth{background:#d5ebe8}
   .cell.cellDare{background:#fdeef1}
@@ -50,17 +69,25 @@
   .cell.home1{background:#f9d7de}
   .cell.home2{background:#d5ebe8}
   .cell.homeX{background:#f2efe9}
-  .cell.center{background:linear-gradient(135deg,#f0d48a,#c9a86a);color:#b3405e;font-weight:800}
-  .tok{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
+  .cell.center{background:linear-gradient(180deg,#f6dc96,#c9a86a 70%,#a8873f);color:#b3405e;font-weight:800;box-shadow:inset 0 2px 0 rgba(255,255,255,.7),inset 0 -4px 0 rgba(90,60,10,.35),0 0 10px rgba(201,168,106,.8);z-index:1}
+  .cell.center span{font-size:20px;text-shadow:0 1px 0 #fff,0 3px 5px rgba(90,60,10,.4)}
+  .tok{position:relative;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;border:2px solid #fff;box-shadow:inset -2px -3px 5px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.3);text-shadow:0 1px 1px rgba(0,0,0,.35);z-index:2}
+  .tok::after{content:"";position:absolute;left:50%;top:calc(100% - 1px);width:80%;height:5px;margin-left:-40%;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(1.5px);z-index:-1}
   .p1{background:var(--rose)} .p2{background:var(--teal)}
+  .tok.p1{background:radial-gradient(circle at 32% 28%,#f2a3b5 0,#d4607d 30%,var(--rose) 60%,#7a2a40 100%)}
+  .tok.p2{background:radial-gradient(circle at 32% 28%,#7fd0ca 0,#2a9a93 30%,var(--teal) 60%,#073432 100%)}
   .tokSmall{width:16px;height:16px;font-size:9px;border-width:1px}
-  .tok.hopping{animation:hop .28s ease}
-  @keyframes hop{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.25)}100%{transform:translateY(0) scale(1)}}
+  .tok.hopping{animation:hop .3s ease}
+  .tok.hopping::after{animation:hopShadow .3s ease}
+  @keyframes hop{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.3)}100%{transform:translateY(0) scale(1)}}
+  @keyframes hopShadow{0%{transform:translateY(0) scale(1);opacity:1}50%{transform:translateY(12px) scale(.55);opacity:.45}100%{transform:translateY(0) scale(1);opacity:1}}
   button{border:0;border-radius:14px;padding:14px 18px;font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation}
-  .primary{background:var(--rose);color:#fff}
+  .primary{background:linear-gradient(180deg,#cf5c77,var(--rose) 60%,#962f4a);color:#fff;box-shadow:0 4px 0 #6f2236,0 8px 14px rgba(179,64,94,.3);text-shadow:0 1px 1px rgba(0,0,0,.25);transition:transform .08s,box-shadow .08s}
+  .primary:active{transform:translateY(3px);box-shadow:0 1px 0 #6f2236,0 3px 6px rgba(179,64,94,.3)}
   .secondary{background:#fff;border:1px solid #e5cdd2;color:var(--ink);padding:11px 14px;font-size:14px}
   .rollBar{margin:14px 0 10px}
-  .rollBar button{width:100%;padding:18px;font-size:19px;border-radius:20px;box-shadow:0 8px 20px rgba(179,64,94,.35)}
+  .rollBar button{width:100%;padding:22px 18px;font-size:21px;border-radius:22px;letter-spacing:.5px;box-shadow:0 6px 0 #6f2236,0 14px 24px rgba(179,64,94,.4)}
+  .rollBar button:active{transform:translateY(4px);box-shadow:0 2px 0 #6f2236,0 5px 10px rgba(179,64,94,.35)}
   .secondaryRow button{flex:1 1 auto}
   @media (max-width:480px){
     h1{font-size:26px}
@@ -68,10 +95,15 @@
     .cell{min-height:26px;font-size:11px}
     .tok{width:20px;height:20px;font-size:11px}
     #turnBanner{font-size:16px;padding:10px 12px}
-    .modal{padding:20px 16px}
+    .modal{padding:0 16px 20px}
+    .modal h2{margin:0 -16px 14px;padding:14px 16px}
+    #board,.board3d::before{transform:rotateX(18deg) scale(.94)}
+    .board3d{perspective:1200px;margin:8px 0 12px}
+    .tok::after{height:4px}
     .modal .row button{flex:1 1 40%}
   }
-  .teal{background:var(--teal);color:#fff}
+  .teal{background:linear-gradient(180deg,#1b7d78,var(--teal) 60%,#0a4642);color:#fff;box-shadow:0 3px 0 #073432,0 6px 12px rgba(15,94,90,.3)}
+  .teal:active{transform:translateY(2px);box-shadow:0 1px 0 #073432}
   button:disabled{opacity:.5;cursor:not-allowed}
   .topicBtn{padding:8px 12px;font-size:13px;border-radius:20px}
   .topicBtn.active{background:var(--rose);color:#fff;border:1px solid var(--rose)}
@@ -80,13 +112,18 @@
   #status{text-align:center;font-weight:700;margin:8px 0}
   #log{font-size:13px;color:#6b5a60;min-height:20px;text-align:center}
   .overlay{position:fixed;inset:0;background:rgba(30,15,20,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
-  .modal{background:#fff;border-radius:18px;padding:22px;max-width:480px;width:100%;text-align:center}
-  .modal h2{margin-top:0}
+  .modal{background:#fff;border-radius:26px;padding:0 22px 22px;max-width:480px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;max-height:92vh;overflow-y:auto}
+  .modal h2{margin:0 -22px 16px;padding:16px 22px;color:#fff;font-family:Georgia,"Times New Roman",serif;background:linear-gradient(135deg,#c9566f,var(--rose) 55%,var(--teal));border-bottom:3px solid #c9a86a;text-shadow:0 1px 2px rgba(0,0,0,.3)}
   .small{font-size:13px;color:#6b5a60;line-height:1.5}
   input[type=text]{padding:11px;border:1px solid #e5cdd2;border-radius:10px;font-size:15px}
   #unlockBox{margin-top:14px;text-align:center}
   #bigDice{font-size:96px;animation:shake .12s infinite}
   @keyframes shake{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-4px)}100%{transform:rotate(-8deg)}}
+@media (max-width:340px){
+    #board,.board3d::before{transform:none!important}
+    .board3d::before{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){.tok.hopping,.tok.hopping::after{animation:none}}
   footer{text-align:center;font-size:12px;color:#8a767c;padding:0 16px 24px;line-height:1.5}
 </style>
 </head>
@@ -105,7 +142,7 @@
     <div id="turnBanner" class="p1 pulse">Giliran Pemain 1<div class="sub">Pion merah muda jalan dulu</div></div>
     <div id="status">Pion masih di home. Lempar dadu untuk mulai.</div>
     <div id="dice">🎲</div>
-    <div id="board"></div>
+    <div class="board3d"><div id="board"></div></div>
     <div id="progressBox"><div id="progressText">Perjalanan ke finish: 0 dari 58 langkah</div><div class="progressWrap"><div id="progressFill"></div></div></div>
     <div id="log">Lempar dadu untuk mulai. Mendarat di 💬 = kartu Truth, di ⚡ = kartu Dare.</div>
     <div class="rollBar">
