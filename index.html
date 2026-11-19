@@ -9,7 +9,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#b3405e">
 <!--
-QC UI/UX v14 -> v15 (singkat):
+QC UI/UX v15 -> v16 (singkat):
 1. Hierarki: judul, banner giliran, papan, dadu sudah urut benar; judul kurang "premium" -> v15 pakai serif + garis gold.
 2. Papan: datar 2D, tile seragam, kurang kedalaman; home base & finish tidak menonjol -> v15 isometrik CSS 3D (tile timbul, panggung, podium).
 3. Pion: flat; sulit dibedakan dari tile -> v15 radial gradient + bayangan jatuh + hop lebih tinggi.
@@ -19,14 +19,24 @@ QC UI/UX v14 -> v15 (singkat):
 7. Kurang biar layak jual: screenshot/preview papan di halaman jual, ringkasan isi deck di atas lipatan, bukti sosial/testimoni,
    pembayaran Lynk yang aktif, dan tes nyata di iOS Safari + Android Chrome.
 8. Fallback: transform 3D hanya aktif lewat @supports; layar <=340px kembali ke papan 2D rata.
+Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, musik generik):
+- Header premium baru + papan di atas "meja" berlapis (frame tebal, bayangan dalam, tilt 30deg desktop/20deg HP).
+- Topik pill diganti grid kartu berkelompok (Romantis / Deep Talk / Keluarga & Hidup), 2 kolom HP, 3 kolom desktop, jumlah kartu dari data TOPICS.
+- Musik adaptif 3 mood (Romantis maj7 lambat / Serius minor rendah spare / Santai pentatonik ceria), Web Audio, indikator "Musik: ...".
+- Claude Pro CLI TIDAK bisa dipakai saat build v16 (limit 5 jam, reset 14:30 UTC) — v16 dikerjakan langsung oleh Lux mengikuti brief yang sama; JS logika game tidak diubah kecuali musik + UI topik.
 -->
 <style>
   :root{--rose:#b3405e;--rose2:#e8a2b0;--cream:#fff7f0;--teal:#0f5e5a;--amber:#d99a2b;--ink:#2b2226}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#fff7f0,#fdeef1 60%,#fff7f0);color:var(--ink)}
   header{padding:14px 16px 4px;text-align:center}
-  h1{margin:0;font-size:34px;color:var(--rose);font-family:Georgia,"Times New Roman",serif;letter-spacing:1px;text-shadow:0 2px 0 #fff,0 4px 10px rgba(179,64,94,.18);display:inline-block;padding-bottom:6px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,transparent,#c9a86a 20%,#e6c98a 50%,#c9a86a 80%,transparent) 1}
+  .brandBadge{display:inline-block;background:linear-gradient(90deg,var(--rose),#8f2f48);color:#fff;font-size:11px;font-weight:800;letter-spacing:2px;padding:5px 12px;border-radius:99px;box-shadow:0 3px 8px rgba(179,64,94,.4)}
+  h1{margin:8px 0 0;font-size:38px;color:var(--rose);font-family:Georgia,"Times New Roman",serif;letter-spacing:1px;text-shadow:0 2px 0 #fff,0 4px 10px rgba(179,64,94,.18);display:inline-block;padding-bottom:6px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,transparent,#c9a86a 20%,#e6c98a 50%,#c9a86a 80%,transparent) 1}
   header p{margin:6px 0;color:#6b5a60}
+  .tagline{font-family:Georgia,"Times New Roman",serif;font-size:19px;font-style:italic;color:var(--teal);margin:4px 0 2px!important;font-weight:700}
+  .headerChips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0 2px}
+  .headerChips span{background:#fff;border:1px solid #e5cdd2;border-radius:99px;padding:5px 10px;font-size:12px;font-weight:700;color:#6b5a60;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+  .musicMood{display:inline-block;margin:8px auto 0;background:linear-gradient(90deg,#fff3d6,#ffe9c2);border:1px solid #e6c98a;color:#7a5a1a;font-size:12px;font-weight:800;padding:5px 12px;border-radius:99px}
   main{max-width:520px;margin:0 auto;padding:8px 16px 32px}
   .card{background:transparent;border:0;border-radius:16px;padding:8px;box-shadow:none}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -42,34 +52,37 @@ QC UI/UX v14 -> v15 (singkat):
   #turnBanner .sub{font-weight:400;font-size:13px;opacity:.9}
   #turnBanner.pulse{animation:pulse 1s ease-in-out infinite alternate}
   @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.02)}}
-  .board3d{position:relative;margin:14px 0 18px;max-width:100%;overflow:visible;perspective:1600px}
-  #board{position:relative;z-index:1;display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:0;background:#a8873f;border:4px solid #c9a86a;border-radius:20px;overflow:hidden;box-shadow:0 14px 28px rgba(60,30,20,.30),0 30px 50px rgba(179,64,94,.18),inset 0 0 0 1px rgba(255,255,255,.4)}
+  .board3d{position:relative;margin:14px 0 20px;max-width:100%;overflow:visible;perspective:1600px;background:linear-gradient(180deg,#8a6a3a,#6b4e2a 55%,#4e3a1e);border:3px solid #c9a86a;border-radius:26px;padding:10px;box-shadow:0 18px 34px rgba(60,30,20,.45),0 34px 60px rgba(179,64,94,.22),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.25)}
+  .board3d::after{content:"MEJA BERDUA";position:absolute;left:0;right:0;bottom:2px;text-align:center;font-size:9px;letter-spacing:4px;font-weight:800;color:rgba(255,240,210,.55)}
+  #board{position:relative;z-index:1;display:grid;grid-template-columns:repeat(15,1fr);gap:1px;margin:0;background:#a8873f;border:5px solid #e6c98a;border-radius:18px;overflow:hidden;box-shadow:0 16px 30px rgba(60,30,20,.40),0 30px 50px rgba(179,64,94,.20),inset 0 0 0 2px #8a6a3a}
   @supports (transform:rotateX(1deg)){
-    #board,.board3d::before{transform:rotateX(28deg) scale(.92);transform-origin:center}
-    .board3d::before{content:"";position:absolute;left:0;right:0;top:0;bottom:0;z-index:0;border-radius:22px;background:linear-gradient(180deg,#8a6a3a,#5c4426);box-shadow:0 26px 40px rgba(40,20,20,.35);translate:0 14px}
+    #board,.board3d::before{transform:rotateX(30deg) scale(.93);transform-origin:center}
+    .board3d::before{content:"";position:absolute;left:10px;right:10px;top:10px;bottom:10px;z-index:0;border-radius:20px;background:linear-gradient(180deg,#3d2c14,#241a0c);box-shadow:0 30px 44px rgba(40,20,20,.45);translate:0 16px}
   }
   .cell{min-height:30px;background:#fffdf8;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a767c;position:relative;box-shadow:inset 0 -3px 0 rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.55)}
   .cell::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(0,0,0,.07));pointer-events:none}
   .cell>span:not(.tok){position:relative;z-index:1}
   #progressBox{margin:10px 0 2px;text-align:center}
   #progressText{font-size:13px;font-weight:700;color:#6b5a60}
-  .progressWrap{height:12px;background:#f0d9de;border-radius:99px;overflow:hidden;margin-top:6px;box-shadow:inset 0 2px 4px rgba(0,0,0,.15)}
+  .progressWrap{height:14px;background:#f0d9de;border-radius:99px;overflow:hidden;margin-top:6px;box-shadow:inset 0 2px 4px rgba(0,0,0,.15);border:1px solid #e5cdd2}
   #progressFill{height:100%;width:0%;background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0) 55%),linear-gradient(90deg,var(--rose),var(--teal));box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);transition:width .4s}
-  .cell.base1{background:linear-gradient(180deg,#c9566f,var(--rose));box-shadow:inset 0 0 8px rgba(0,0,0,.35),inset 0 -3px 0 rgba(0,0,0,.2)}
-  .cell.base2{background:linear-gradient(180deg,#1b7d78,var(--teal));box-shadow:inset 0 0 8px rgba(0,0,0,.35),inset 0 -3px 0 rgba(0,0,0,.2)}
+  .cell.base1{background:linear-gradient(180deg,#d4607d,var(--rose) 60%,#8f2f48);box-shadow:inset 0 0 10px rgba(0,0,0,.4),inset 0 -4px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.35)}
+  .cell.base2{background:linear-gradient(180deg,#2a9a93,var(--teal) 60%,#073432);box-shadow:inset 0 0 10px rgba(0,0,0,.4),inset 0 -4px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.35)}
   .cell.baseX{background:#e9e2d8}
   .cell.baseInner{background:#fffdf8}
   .cell.base1.baseInner{background:#ffeef2;box-shadow:inset 0 3px 6px rgba(143,47,72,.35),inset 0 -2px 0 rgba(255,255,255,.6)}
   .cell.base2.baseInner{background:#e0f2f0;box-shadow:inset 0 3px 6px rgba(10,70,66,.35),inset 0 -2px 0 rgba(255,255,255,.6)}
   .cell.trackHeart{background:#fdeef1}
-  .cell.cellTruth{background:#d5ebe8}
-  .cell.cellDare{background:#fdeef1}
+  .cell.cellTruth{background:#a8ddd6;box-shadow:inset 0 -3px 0 rgba(10,70,66,.35),inset 0 1px 0 rgba(255,255,255,.7)}
+  .cell.cellTruth span{color:#0a4642;font-weight:800}
+  .cell.cellDare{background:#f9c3cf;box-shadow:inset 0 -3px 0 rgba(143,47,72,.35),inset 0 1px 0 rgba(255,255,255,.7)}
+  .cell.cellDare span{color:#8f2f48;font-weight:800}
   .cell.start1{background:#f9d7de}
   .cell.start2{background:#d5ebe8}
   .cell.home1{background:#f9d7de}
   .cell.home2{background:#d5ebe8}
   .cell.homeX{background:#f2efe9}
-  .cell.center{background:linear-gradient(180deg,#f6dc96,#c9a86a 70%,#a8873f);color:#b3405e;font-weight:800;box-shadow:inset 0 2px 0 rgba(255,255,255,.7),inset 0 -4px 0 rgba(90,60,10,.35),0 0 10px rgba(201,168,106,.8);z-index:1}
+  .cell.center{background:linear-gradient(180deg,#ffe9a8,#e6c98a 55%,#b98c3a);color:#b3405e;font-weight:800;box-shadow:inset 0 2px 0 rgba(255,255,255,.85),inset 0 -5px 0 rgba(90,60,10,.4),0 0 16px rgba(230,201,138,.95);z-index:1}
   .cell.center span{font-size:20px;text-shadow:0 1px 0 #fff,0 3px 5px rgba(90,60,10,.4)}
   .tok{position:relative;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;border:2px solid #fff;box-shadow:inset -2px -3px 5px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.3);text-shadow:0 1px 1px rgba(0,0,0,.35);z-index:2}
   .tok::after{content:"";position:absolute;left:50%;top:calc(100% - 1px);width:80%;height:5px;margin-left:-40%;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(1.5px);z-index:-1}
@@ -97,7 +110,9 @@ QC UI/UX v14 -> v15 (singkat):
     #turnBanner{font-size:16px;padding:10px 12px}
     .modal{padding:0 16px 20px}
     .modal h2{margin:0 -16px 14px;padding:14px 16px}
-    #board,.board3d::before{transform:rotateX(18deg) scale(.94)}
+    #board,.board3d::before{transform:rotateX(20deg) scale(.95)}
+    .board3d{padding:8px}
+    h1{font-size:30px}
     .board3d{perspective:1200px;margin:8px 0 12px}
     .tok::after{height:4px}
     .modal .row button{flex:1 1 40%}
@@ -106,15 +121,39 @@ QC UI/UX v14 -> v15 (singkat):
   .teal:active{transform:translateY(2px);box-shadow:0 1px 0 #073432}
   button:disabled{opacity:.5;cursor:not-allowed}
   .topicBtn{padding:8px 12px;font-size:13px;border-radius:20px}
-  .topicBtn.active{background:var(--rose);color:#fff;border:1px solid var(--rose)}
-  .topicBtn.locked{opacity:.45}
-  #dice{font-size:32px;text-align:center;margin:4px 0}
-  #status{text-align:center;font-weight:700;margin:8px 0}
+  .topicSection{margin-top:16px;text-align:left}
+  .topicSection>h3{margin:0 0 2px;font-family:Georgia,"Times New Roman",serif;color:var(--rose);font-size:20px;text-align:center}
+  .topicSection>p{text-align:center;margin:0 0 10px}
+  .topicGroupTitle{margin:14px 2px 6px;font-size:12px;font-weight:800;letter-spacing:2px;color:#8a767c;text-transform:uppercase}
+  .topicGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (min-width:481px){.topicGrid{grid-template-columns:repeat(3,1fr)}}
+  .topicCard{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;background:#fff;border:2px solid #e5cdd2;border-radius:16px;padding:12px;box-shadow:0 3px 10px rgba(0,0,0,.07);font-size:14px;color:var(--ink)}
+  .topicCard .tName{font-weight:800;font-size:14px;line-height:1.25}
+  .topicCard .tMeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .topicCard .tCount{font-size:12px;color:#6b5a60;font-weight:700}
+  .tMood{font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px}
+  .mood-romantis{background:#fdeef1;color:#8f2f48;border:1px solid #f2c3cd}
+  .mood-serius{background:#e0f2f0;color:#0a4642;border:1px solid #b3dcd7}
+  .mood-santai{background:#fff3d6;color:#7a5a1a;border:1px solid #e6c98a}
+  .mood-mixed{background:#f2efe9;color:#6b5a60;border:1px solid #ddd5c8}
+  .topicCard .tState{font-size:12px;font-weight:700;color:#8a767c}
+  .topicCard .tDesc{font-size:12px;color:#6b5a60;line-height:1.4}
+  .topicCard.featured{grid-column:1/-1;background:linear-gradient(135deg,#fff0f3,#e0f2f0);border-color:#c9a86a}
+  .topicCard.featured .tName{font-size:17px}
+  .topicCard.locked{opacity:.75}
+  .topicCard.locked .tName{color:#6b5a60}
+  .topicCard.active{border-color:var(--rose);box-shadow:0 0 0 2px rgba(179,64,94,.25),0 6px 16px rgba(179,64,94,.20)}
+  .topicCard.active .tState{color:var(--rose)}
+  #dice{font-size:44px;text-align:center;margin:6px auto;padding:2px 0;background:#fff;border:1px solid #e5cdd2;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.10);max-width:120px}
+  #status{text-align:center;font-weight:700;margin:8px 0;background:#fff;border:1px solid #e5cdd2;border-radius:12px;padding:8px 10px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
   #log{font-size:13px;color:#6b5a60;min-height:20px;text-align:center}
   .overlay{position:fixed;inset:0;background:rgba(30,15,20,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
   .modal{background:#fff;border-radius:26px;padding:0 22px 22px;max-width:480px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;max-height:92vh;overflow-y:auto}
   .modal h2{margin:0 -22px 16px;padding:16px 22px;color:#fff;font-family:Georgia,"Times New Roman",serif;background:linear-gradient(135deg,#c9566f,var(--rose) 55%,var(--teal));border-bottom:3px solid #c9a86a;text-shadow:0 1px 2px rgba(0,0,0,.3)}
   .small{font-size:13px;color:#6b5a60;line-height:1.5}
+  #cardMeta{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0 2px}
+  #cardMeta span{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:#f2efe9;color:#6b5a60;border:1px solid #ddd5c8}
+  #cardMeta span.mood-romantis,#cardMeta span.mood-serius,#cardMeta span.mood-santai{background:#fff}
   input[type=text]{padding:11px;border:1px solid #e5cdd2;border-radius:10px;font-size:15px}
   #unlockBox{margin-top:14px;text-align:center}
   #bigDice{font-size:96px;animation:shake .12s infinite}
@@ -129,8 +168,11 @@ QC UI/UX v14 -> v15 (singkat):
 </head>
 <body>
 <header>
+  <span class="brandBadge">18+ &middot; PASUTRI &amp; PASANGAN DEWASA</span>
   <h1>Ludo Berdua</h1>
-  <p>Satu papan, dua hati. Game Truth or Dare untuk pasangan dewasa — pasutri, PDKT, atau menuju serius.</p>
+  <p class="tagline">Satu papan, dua hati.</p>
+  <p>Game Truth or Dare untuk pasangan dewasa &mdash; pasutri, PDKT, atau menuju serius.</p>
+  <div class="headerChips"><span>&#127922; 2 pion / pemain</span><span>&#128172;&#9889; 276 kartu</span><span>&#128274; Privat &middot; tanpa akun</span></div>
 </header>
 
 <main>
@@ -140,6 +182,7 @@ QC UI/UX v14 -> v15 (singkat):
       <div><label>Pemain 2</label><input id="name2" type="text" value="Pemain 2"></div>
     </div>
     <div id="turnBanner" class="p1 pulse">Giliran Pemain 1<div class="sub">Pion merah muda jalan dulu</div></div>
+    <div style="text-align:center"><span id="musicMood" class="musicMood">&#9834; Musik: Santai</span></div>
     <div id="status">Pion masih di home. Lempar dadu untuk mulai.</div>
     <div id="dice">🎲</div>
     <div class="board3d"><div id="board"></div></div>
@@ -157,26 +200,38 @@ QC UI/UX v14 -> v15 (singkat):
     </div>
     <p class="small" style="text-align:center">Rute umum, sama seperti Ludo biasa: Home → START ★ → keliling searah jarum jam (52 kotak) → Jalur Home 6 kotak warna pemain → Finish tengah, harus angka pas. 2 pion per pemain, tanpa makan pion, fokusnya kartu. Menang kalau kedua pionmu sampai finish. Setiap kotak ganjil = kartu: 26 dari 52 kotak trek (50%), selang-seling 💬 Truth dan ⚡ Dare. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat. Penjelasan lengkap ada di tombol Cara Main &amp; Rute.</p>
     <div id="unlockBox">
-      <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>
-      <div id="topicRow" class="row" style="justify-content:center;margin:10px 0">
-        <button class="topicBtn active" data-topic="semua" onclick="selectTopic('semua')">Semua Topik 🔒</button>
-        <button class="topicBtn locked" data-topic="umum" onclick="selectTopic('umum')">Umum 🔒</button>
-        <button class="topicBtn locked" data-topic="honeymoon" onclick="selectTopic('honeymoon')">Honeymoon 🔒</button>
-        <button class="topicBtn locked" data-topic="kehamilan" onclick="selectTopic('kehamilan')">Kehamilan 🔒</button>
-        <button class="topicBtn locked" data-topic="anniversary" onclick="selectTopic('anniversary')">Anniversary 🔒</button>
-        <button class="topicBtn locked" data-topic="liburan" onclick="selectTopic('liburan')">Liburan 🔒</button>
-        <button class="topicBtn locked" data-topic="ranjang" onclick="selectTopic('ranjang')">Ranjang 🔒</button>
-        <button class="topicBtn locked" data-topic="politik" onclick="selectTopic('politik')">Politik 🔒</button>
-        <button class="topicBtn locked" data-topic="ekonomi" onclick="selectTopic('ekonomi')">Ekonomi 🔒</button>
-        <button class="topicBtn locked" data-topic="agama" onclick="selectTopic('agama')">Agama 🔒</button>
-        <button class="topicBtn locked" data-topic="masa-depan" onclick="selectTopic('masa-depan')">Masa Depan 🔒</button>
-        <button class="topicBtn locked" data-topic="rumah-tangga" onclick="selectTopic('rumah-tangga')">Rumah Tangga 🔒</button>
-        <button class="topicBtn locked" data-topic="anak" onclick="selectTopic('anak')">Anak & Parenting 🔒</button>
-        <button class="topicBtn locked" data-topic="mertua" onclick="selectTopic('mertua')">Mertua & Keluarga Besar 🔒</button>
-        <button class="topicBtn locked" data-topic="komunikasi" onclick="selectTopic('komunikasi')">Komunikasi & Konflik 🔒</button>
-        <button class="topicBtn locked" data-topic="karier" onclick="selectTopic('karier')">Karier & Ambisi 🔒</button>
-        <button class="topicBtn locked" data-topic="persiapan-nikah" onclick="selectTopic('persiapan-nikah')">Persiapan Nikah & PDKT 🔒</button>
-        <button class="topicBtn locked" data-topic="kesehatan" onclick="selectTopic('kesehatan')">Kesehatan & Me Time 🔒</button>
+      <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>      <div class="topicSection">
+        <h3>Pilih Topik</h3>
+        <p class="small">Satu topik, satu suasana &mdash; musik ikut berubah mengikuti mood topik.</p>
+        <div class="topicGrid">
+        <button class="topicCard topicBtn featured active" data-topic="semua" onclick="selectTopic('semua')"><span class="tName">Semua Topik</span><span class="tMeta"><span class="tCount">276 kartu</span><span class="tMood mood-mixed">Semua mood</span></span><span class="tDesc">Acak dari semua topik &mdash; paling seru buat malam pertama main.</span><span class="tState">&#128274; Deck Lengkap</span></button>
+        </div>
+        <div class="topicGroupTitle">Romantis</div>
+        <div class="topicGrid">
+        <button class="topicCard topicBtn locked" data-topic="honeymoon" onclick="selectTopic('honeymoon')"><span class="tName">Honeymoon</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-romantis">Romantis</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="anniversary" onclick="selectTopic('anniversary')"><span class="tName">Anniversary</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-romantis">Romantis</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="ranjang" onclick="selectTopic('ranjang')"><span class="tName">Ranjang (Pasutri)</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-romantis">Romantis</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="persiapan-nikah" onclick="selectTopic('persiapan-nikah')"><span class="tName">Persiapan Nikah &amp; PDKT</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-romantis">Romantis</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        </div>
+        <div class="topicGroupTitle">Deep Talk</div>
+        <div class="topicGrid">
+        <button class="topicCard topicBtn locked" data-topic="politik" onclick="selectTopic('politik')"><span class="tName">Deep Talk: Politik</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-serius">Serius</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="ekonomi" onclick="selectTopic('ekonomi')"><span class="tName">Deep Talk: Ekonomi</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-serius">Serius</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="agama" onclick="selectTopic('agama')"><span class="tName">Deep Talk: Agama</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-serius">Serius</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="masa-depan" onclick="selectTopic('masa-depan')"><span class="tName">Deep Talk: Masa Depan</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-serius">Serius</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="rumah-tangga" onclick="selectTopic('rumah-tangga')"><span class="tName">Deep Talk: Rumah Tangga</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-serius">Serius</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        </div>
+        <div class="topicGroupTitle">Keluarga &amp; Hidup</div>
+        <div class="topicGrid">
+        <button class="topicCard topicBtn locked" data-topic="umum" onclick="selectTopic('umum')"><span class="tName">Umum</span><span class="tMeta"><span class="tCount">20 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="kehamilan" onclick="selectTopic('kehamilan')"><span class="tName">Kehamilan</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="liburan" onclick="selectTopic('liburan')"><span class="tName">Liburan</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="anak" onclick="selectTopic('anak')"><span class="tName">Anak &amp; Parenting</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="mertua" onclick="selectTopic('mertua')"><span class="tName">Mertua &amp; Keluarga Besar</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="komunikasi" onclick="selectTopic('komunikasi')"><span class="tName">Komunikasi &amp; Konflik</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="karier" onclick="selectTopic('karier')"><span class="tName">Karier &amp; Ambisi</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        <button class="topicCard topicBtn locked" data-topic="kesehatan" onclick="selectTopic('kesehatan')"><span class="tName">Kesehatan &amp; Me Time</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
+        </div>
       </div>
       <p class="small" id="topicNote">Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.</p>
       <div class="row" style="justify-content:center">
@@ -211,6 +266,7 @@ QC UI/UX v14 -> v15 (singkat):
 <div class="overlay" id="cardOverlay" style="display:none">
   <div class="modal">
     <h2 id="cardTitle">Kartu</h2>
+    <div id="cardMeta"><span id="cardTopicChip">Topik: Demo</span><span id="cardMoodChip" class="mood-santai">Santai &#9834;</span></div>
     <p id="cardPrompt" class="small">Pilih Truth atau Dare.</p>
     <div class="row" style="justify-content:center" id="choiceBtns">
       <button class="primary" onclick="showCard('truth')">Truth</button>
@@ -825,32 +881,64 @@ function playHop(){ tone(520, 0.12, "sine", 0.20); }
 function playHeart(){ tone(880, 0.25, "sine", 0.20); tone(1318, 0.35, "sine", 0.18, 0.15); }
 function playWin(){ [523,659,784,1047].forEach((f,i)=>tone(f, 0.4, "triangle", 0.20, i*0.18)); }
 function playCard(){ tone(740, 0.2, "sine", 0.18); tone(988, 0.25, "sine", 0.15, 0.12); }
+// ---------- Musik adaptif per mood (Web Audio, tanpa file eksternal) ----------
+// ROMANTIS: lambat, akor mayor 7 hangat, melodi legato nada tinggi halus.
+// SERIUS: lebih lambat, akor minor nada rendah, jarang/spare, tenang & khidmat.
+// SANTAI: lebih cepat & ceria, pentatonik mayor, ringan.
+const MOODS = {
+  romantis: { interval: 3000, chordVol: 0.14, chordDur: 2.8, chordType: "triangle",
+    chords: [[261.6,329.6,392.0,493.9],[174.6,220.0,261.6,329.6],[220.0,261.6,329.6,392.0],[196.0,246.9,293.7,370.0]],
+    melody: [523.3,659.3,784.0,880.0,784.0,659.3], melodyVol: 0.10, melodyEvery: 1, melodyDur: 1.6 },
+  serius: { interval: 3600, chordVol: 0.12, chordDur: 3.2, chordType: "sine",
+    chords: [[110.0,164.8,220.0],[146.8,174.6,220.0],[164.8,196.0,246.9],[130.8,164.8,196.0]],
+    melody: [220.0,196.0,164.8,146.8], melodyVol: 0.08, melodyEvery: 4, melodyDur: 1.8 },
+  santai: { interval: 1800, chordVol: 0.13, chordDur: 1.6, chordType: "triangle",
+    chords: [[261.6,329.6,392.0],[196.0,246.9,293.7],[174.6,220.0,261.6],[220.0,261.6,329.6]],
+    melody: [523.3,587.3,659.3,784.0,880.0,784.0,659.3,587.3], melodyVol: 0.11, melodyEvery: 1, melodyDur: 0.9 }
+};
+const TOPIC_MOOD = { honeymoon:"romantis", anniversary:"romantis", ranjang:"romantis", "persiapan-nikah":"romantis",
+  politik:"serius", ekonomi:"serius", agama:"serius", "masa-depan":"serius", komunikasi:"serius", karier:"serius",
+  umum:"santai", kehamilan:"santai", liburan:"santai", "rumah-tangga":"santai", anak:"santai", mertua:"santai", kesehatan:"santai", semua:"santai" };
+const MOOD_LABEL = { romantis:"Romantis", serius:"Serius", santai:"Santai" };
+let currentMood = "santai";
+let cardPrevMood = null;
+function moodForTopic(t){ return TOPIC_MOOD[t] || "santai"; }
+function updateMusicIndicator(){
+  const el = document.getElementById("musicMood");
+  if(el) el.textContent = "\u266A Musik: " + (musicOn ? MOOD_LABEL[currentMood] : "Mati");
+  const btn = document.getElementById("musicBtn");
+  if(btn) btn.textContent = "Musik: " + (musicOn ? "Nyala \u00B7 " + MOOD_LABEL[currentMood] + " \u266A" : "Mati");
+}
+function setMood(m){
+  if(!MOODS[m]) m = "santai";
+  if(m === currentMood){ updateMusicIndicator(); return; }
+  currentMood = m; musicStep = 0; updateMusicIndicator();
+  if(musicOn && audioCtx) startMusic();
+}
 function startMusic(){
   if(!musicOn) return;
   if(musicTimer) clearInterval(musicTimer);
   if(!audioCtx) ensureAudio();
   if(!audioCtx) return;
-  // Di HP, AudioContext sering masih 'suspended' sesaat setelah tap pertama.
-  // Tunggu resume dulu, baru bunyikan chord pertama, supaya musik tidak hilang di awal.
   const begin = ()=>{
     if(!musicOn) return;
-    const chords = [[261.6,329.6,392.0],[220.0,261.6,329.6],[174.6,220.0,261.6],[196.0,246.9,293.7]];
-    const melody = [523.3,587.3,659.3,784.0,659.3,587.3];
-    chords[0].forEach(f=>toneRaw(f, 2.2, "triangle", 0.16));
+    const cfg = MOODS[currentMood];
+    cfg.chords[0].forEach(f=>toneRaw(f, cfg.chordDur, cfg.chordType, cfg.chordVol));
     musicTimer = setInterval(()=>{
       if(!musicOn || !audioCtx) return;
-      const chord = chords[musicStep % chords.length];
-      chord.forEach(f=>toneRaw(f, 2.2, "triangle", 0.16));
-      if(musicStep % 2 === 0) toneRaw(melody[musicStep % melody.length], 1.2, "sine", 0.12, 0.6);
+      const c = MOODS[currentMood];
+      const chord = c.chords[musicStep % c.chords.length];
+      chord.forEach(f=>toneRaw(f, c.chordDur, c.chordType, c.chordVol));
+      if(musicStep % c.melodyEvery === 0) toneRaw(c.melody[musicStep % c.melody.length], c.melodyDur, "sine", c.melodyVol, 0.5);
       musicStep++;
-    }, 2400);
+    }, cfg.interval);
   };
   if(audioCtx.state === "suspended"){ audioCtx.resume().then(begin).catch(begin); }
   else begin();
 }
 function toggleMusic(){
   ensureAudio(); musicOn = !musicOn;
-  document.getElementById("musicBtn").textContent = "Musik: " + (musicOn ? "Nyala" : "Mati");
+  updateMusicIndicator();
   if(musicOn) startMusic();
   else if(musicTimer){ clearInterval(musicTimer); musicTimer = null; }
 }
@@ -888,24 +976,24 @@ function updateTurnUI(){
 }
 function updateUnlockUI(){
   document.getElementById("unlockStatus").innerHTML = unlocked ? "Mode: <b>Deck Lengkap terbuka</b> — pilih topik di bawah." : "Mode: <b>Demo gratis</b> — 1 topik ringan saja.";
-  document.querySelectorAll(".topicBtn").forEach(b=>{
+  document.querySelectorAll(".topicCard").forEach(b=>{
     const t = b.getAttribute("data-topic");
     b.classList.toggle("active", unlocked && selectedTopic === t);
     b.classList.toggle("locked", !unlocked);
-    b.textContent = b.textContent.replace(" 🔒","").replace(" ✓","");
-    if(!unlocked) b.textContent += " 🔒";
-    else if(selectedTopic === t) b.textContent += " ✓";
+    const st = b.querySelector(".tState");
+    if(st) st.textContent = !unlocked ? "\uD83D\uDD12 Deck Lengkap" : (selectedTopic === t ? "\u2713 Dipilih" : "Terbuka \u2014 tap untuk pilih");
   });
   document.getElementById("topicNote").textContent = unlocked
     ? "Berbayar = bisa pilih topik spesifik (Umum, Honeymoon, Kehamilan, Anniversary, Liburan, Ranjang khusus pasutri, plus Deep Talk: Politik, Ekonomi, Agama, Masa Depan, Rumah Tangga) + bank kartu jauh lebih besar. Topik Deep Talk cocok buat PDKT / menuju serius. Pilih Semua Topik untuk kartu acak dari semua topik."
     : "Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.";
+  updateMusicIndicator();
 }
 function selectTopic(t){
   if(!unlocked){
     alert("Topik ini hanya untuk deck lengkap. Buka dulu dengan kode akses.");
     return;
   }
-  selectedTopic = t; playClick(); updateUnlockUI();
+  selectedTopic = t; playClick(); updateUnlockUI(); setMood(moodForTopic(t));
 }
 function renderBoard(){
   const board = document.getElementById("board");
@@ -958,6 +1046,7 @@ function renderBoard(){
 }
 function enterGame(){
   ensureAudio();
+  currentMood = "santai"; updateMusicIndicator();
   startMusic();
   document.getElementById("gate").style.display = "none";
   updateUnlockUI(); renderBoard();
@@ -1067,6 +1156,18 @@ async function rollDice(){
 }
 function openCard(kind){
   playCard();
+  cardPrevMood = currentMood;
+  let cardMood = "santai";
+  if(unlocked && selectedTopic !== "semua") cardMood = moodForTopic(selectedTopic);
+  else if(unlocked && selectedTopic === "semua"){
+    const keys = Object.keys(TOPICS);
+    cardMood = moodForTopic(keys[Math.floor(Math.random()*keys.length)]);
+  }
+  setMood(cardMood);
+  const tc = document.getElementById("cardTopicChip");
+  if(tc) tc.textContent = "Topik: " + topicLabel();
+  const mc = document.getElementById("cardMoodChip");
+  if(mc){ mc.textContent = MOOD_LABEL[cardMood] + " \u266A"; mc.className = "mood-" + cardMood; }
   const isTruth = kind === "truth";
   document.getElementById("cardTitle").textContent = (isTruth ? "Kartu Truth 💬 — " : "Kartu Dare ⚡ — ") + names()[turn];
   document.getElementById("cardPrompt").textContent = (isTruth ? "Truth" : "Dare") + " — " + topicLabel() + ". Jawab / lakukan dengan jujur dan saling menghormati.";
@@ -1098,6 +1199,7 @@ function showCard(kind){
 }
 function closeCard(){
   playClick();
+  if(cardPrevMood){ setMood(cardPrevMood); cardPrevMood = null; }
   document.getElementById("cardOverlay").style.display = "none";
   turn = 1 - turn;
   renderBoard();
