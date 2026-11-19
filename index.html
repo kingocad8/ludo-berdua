@@ -246,7 +246,10 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
         <input id="codeInput" type="text" placeholder="Masukkan kode akses pembelian">
         <button class="teal" onclick="unlockFull()">Buka Deck Lengkap</button>
       </div>
-      <p class="small">Deck lengkap dibuka dengan kode akses yang dikirim penjual setelah pembelian terverifikasi.</p>
+      <div class="row" style="justify-content:center;margin-top:10px">
+        <button class="primary" onclick="window.open('https://lynk.id/ochadpage','_blank')">Dapatkan Kode Akses — Lynk · Segera Hadir</button>
+      </div>
+      <p class="small">Deck lengkap dibuka dengan kode akses yang dikirim penjual setelah pembelian terverifikasi. Toko Lynk masih tahap aktivasi — kalau produk belum tampil di sana, hubungi penjual via DM @ludoberdua.</p>
     </div>
   </div>
 </main>
@@ -283,7 +286,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
     <div id="cardText" style="font-size:18px;line-height:1.5;margin:16px 0"></div>
     <div class="row" style="justify-content:center">
       <button class="secondary" onclick="closeCard()">Lewati Kartu</button>
-      <button class="primary" id="doneBtn" style="display:none" onclick="closeCard()">Selesai, Lanjut Main</button>
+      <button class="primary" id="doneBtn" style="display:none" onclick="completeCard()">Selesai, Lanjut Main</button>
     </div>
     <p class="small">Lewati kapan pun kalau salah satu tidak nyaman. Tidak ada hukuman.</p>
   </div>
@@ -330,6 +333,9 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       <b>5.</b> Simpan kodemu, jangan disebarluaskan. Satu kode untuk membuka deck di perangkatmu.<br><br>
       <b>Status saat ini:</b> masih tahap demo &amp; daftar tunggu. Penjualan resmi lewat Lynk dibuka begitu PayMe aktif — jangan transfer ke rekening lain yang mengatasnamakan game ini.
     </p>
+    <div class="row" style="justify-content:center;margin-bottom:10px">
+      <button class="primary" onclick="window.open('https://lynk.id/ochadpage','_blank')">Dapatkan Kode Akses — Lynk · Segera Hadir</button>
+    </div>
     <button class="primary" onclick="closeBuy()">Mengerti</button>
   </div>
 </div>
@@ -889,6 +895,16 @@ function playHop(){ tone(520, 0.12, "sine", 0.20); }
 function playHeart(){ tone(880, 0.25, "sine", 0.20); tone(1318, 0.35, "sine", 0.18, 0.15); }
 function playWin(){ [523,659,784,1047].forEach((f,i)=>tone(f, 0.4, "triangle", 0.20, i*0.18)); }
 function playCard(){ tone(740, 0.2, "sine", 0.18); tone(988, 0.25, "sine", 0.15, 0.12); }
+// v18: "jeng-JENG" ceria setelah kartu Truth/Dare selesai dimainkan — bunyi saat tap
+// "Selesai, Lanjut Main" saja, BUKAN saat "Lewati Kartu" (lewat = tidak dimainkan).
+// Dua ketuk naik (C-E lalu G tinggi + kilau), pendek ~0,4 dtk, beda dari fanfare menang.
+function playCardDone(){
+  ensureAudio();
+  tone(523.3, 0.14, "triangle", 0.22);
+  tone(659.3, 0.14, "triangle", 0.20, 0.02);
+  tone(784.0, 0.28, "triangle", 0.22, 0.14);
+  tone(1046.5, 0.22, "sine", 0.14, 0.16);
+}
 // ---------- Musik adaptif per mood (Web Audio, tanpa file eksternal) ----------
 // ROMANTIS: lambat, akor mayor 7 hangat, melodi legato nada tinggi halus.
 // SERIUS: lebih lambat, akor minor nada rendah, jarang/spare, tenang & khidmat.
@@ -1141,7 +1157,7 @@ async function rollDice(){
   movingPawn = -1;
   step[turn][chosen] = target;
   renderBoard();
-  document.getElementById("log").textContent = nm + " dapat " + d + ", pion " + (chosen === 0 ? "1A" : "1B") + " maju ke langkah " + target + ".";
+  document.getElementById("log").textContent = nm + " dapat " + d + ", pion " + (turn+1) + (chosen === 0 ? "A" : "B") + " maju ke langkah " + target + ".";
   if(step[turn][0] === WIN_STEP && step[turn][1] === WIN_STEP){
     gameOver = true; playWin(); renderBoard();
     setPlayerModal("winOverlay");
@@ -1215,6 +1231,11 @@ function showCard(kind){
   document.getElementById("cardText").textContent = text;
   document.getElementById("choiceBtns").style.display = "none";
   document.getElementById("doneBtn").style.display = "inline-block";
+}
+// v18: kartu selesai dimainkan -> bunyi "jeng-JENG" dulu, baru lanjut main.
+function completeCard(){
+  playCardDone();
+  closeCard();
 }
 function closeCard(){
   playClick();
