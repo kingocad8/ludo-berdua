@@ -82,10 +82,10 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
   .cell.cellTruth .miniCard{border:2px solid #0f5e5a;color:#0f5e5a}
   .cell.cellDare .miniCard{border:2px solid #b3405e;color:#b3405e}
   .decks{display:flex;gap:12px;margin:14px 0 4px}
-  .deck{position:relative;flex:1;border-radius:14px;padding:12px 10px 10px;text-align:center;color:#fff}
+  .deck{position:relative;flex:1;border-radius:14px;padding:10px 10px 8px;text-align:center;color:#fff}
   .deckTruth{background:linear-gradient(180deg,#1b7d78,#0f5e5a);box-shadow:0 3px 0 #0a4642,0 6px 0 #083a37,0 12px 18px rgba(0,0,0,.28)}
   .deckDare{background:linear-gradient(180deg,#c9566f,#b3405e);box-shadow:0 3px 0 #8f2f48,0 6px 0 #6f2236,0 12px 18px rgba(0,0,0,.28)}
-  .deck .deckLetter{font-size:34px;font-weight:900;line-height:1;background:#fff;border-radius:8px;display:inline-block;padding:4px 10px;margin-bottom:4px;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+  .deck .deckLetter{font-size:30px;font-weight:900;line-height:1;background:#fff;border-radius:8px;display:inline-block;padding:4px 10px;margin-bottom:4px;box-shadow:0 2px 4px rgba(0,0,0,.25)}
   .deckTruth .deckLetter{color:#0f5e5a}
   .deckDare .deckLetter{color:#b3405e}
   .deck .deckName{font-weight:800;letter-spacing:1px;font-size:14px}
@@ -221,7 +221,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       <div class="deck deckTruth" id="deckTruth"><span class="flyCard">T</span><span class="deckLetter">T</span><div class="deckName">TRUTH</div><div class="deckSub">Tumpukan kartu Truth</div></div>
       <div class="deck deckDare" id="deckDare"><span class="flyCard">D</span><span class="deckLetter">D</span><div class="deckName">DARE</div><div class="deckSub">Tumpukan kartu Dare</div></div>
     </div>
-    <div id="progressBox"><div id="progressText">Perjalanan ke finish: 0 dari 58 langkah</div><div class="progressWrap"><div id="progressFill"></div></div></div>
+    <div id="progressBox"><div id="progressText">0 dari 116 langkah</div><div class="progressWrap"><div id="progressFill"></div></div></div>
     <div id="log">Lempar dadu untuk mulai. Mendarat di kartu T = Truth, di kartu D = Dare.</div>
     <div class="rollBar">
       <button class="primary" id="rollBtn" onclick="rollDice()">🎲 Kocok Dadu</button>
@@ -232,8 +232,9 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       <button class="secondary" id="sfxBtn" onclick="toggleSfx()">Suara: Nyala</button>
       <button class="secondary" onclick="showRoute()">Cara Main &amp; Rute</button>
       <button class="secondary" onclick="showBuy()">Cara Beli</button>
+      <button class="secondary" onclick="showInfo()">ⓘ Info</button>
     </div>
-    <p class="small" style="text-align:center">Rute umum, sama seperti Ludo biasa: Home → START ★ → keliling searah jarum jam (52 kotak) → Jalur Home 6 kotak warna pemain → Finish tengah, harus angka pas. 2 pion per pemain, tanpa makan pion, fokusnya kartu. Menang kalau kedua pionmu sampai finish. Setiap kotak ganjil = kartu: 26 dari 52 kotak trek (50%), selang-seling kartu T (Truth, hijau tosca) dan kartu D (Dare, merah muda) — mendarat di sana, satu kartu diambil dari tumpukan di bawah papan. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat. Penjelasan lengkap ada di tombol Cara Main &amp; Rute.</p>
+    <p class="small" style="text-align:center">Kartu T = Truth · Kartu D = Dare — mendarat di kotak ganjil, ambil kartu dari tumpukan. Detail lengkap di Cara Main &amp; Rute.</p>
     <div id="unlockBox">
       <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>      <div class="topicSection">
         <h3>Pilih Topik</h3>
@@ -268,21 +269,19 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
         <button class="topicCard topicBtn locked" data-topic="kesehatan" onclick="selectTopic('kesehatan')"><span class="tName">Kesehatan &amp; Me Time</span><span class="tMeta"><span class="tCount">16 kartu</span><span class="tMood mood-santai">Santai</span></span><span class="tState">&#128274; Deck Lengkap</span></button>
         </div>
       </div>
-      <p class="small" id="topicNote">Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.</p>
-      <div class="row" style="justify-content:center">
-        <input id="codeInput" type="text" placeholder="Masukkan kode akses pembelian">
-        <button class="teal" onclick="unlockFull()">Buka Deck Lengkap</button>
+      <p class="small" id="topicNote">Deck lengkap = pilih topik + 276 kartu.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <input id="codeInput" type="text" placeholder="Masukkan kode akses pembelian" style="width:100%">
+        <button class="teal" style="width:100%" onclick="unlockFull()">Buka Deck Lengkap</button>
+        <button class="primary" style="width:100%" onclick="window.open('https://lynk.id/ochadpage','_blank')">Dapatkan Kode Akses — Lynk · Segera Hadir</button>
       </div>
-      <div class="row" style="justify-content:center;margin-top:10px">
-        <button class="primary" onclick="window.open('https://lynk.id/ochadpage','_blank')">Dapatkan Kode Akses — Lynk · Segera Hadir</button>
-      </div>
-      <p class="small">Deck lengkap dibuka dengan kode akses yang dikirim penjual setelah pembelian terverifikasi. Toko Lynk masih tahap aktivasi — kalau produk belum tampil di sana, hubungi penjual via DM @ludoberdua.</p>
+      <p class="small">Kode dikirim penjual setelah pembelian terverifikasi. Toko Lynk masih aktivasi — detail di Cara Beli.</p>
     </div>
   </div>
 </main>
 
 <footer>
-  Khusus dewasa 18+ dan dimainkan atas persetujuan bersama. Game ini berjalan lokal di perangkatmu, tidak mengirim data apa pun ke server. Kalau salah satu tidak nyaman dengan sebuah kartu, lewati saja, tanpa hukuman. Musik dan suara dibuat dari Web Audio di perangkatmu, tanpa lagu berlisensi. Catatan jujur: ini 2 pion per pemain, tanpa makan pion, fokusnya kartu pasangan, bukan turnamen Ludo.
+  18+ · Privat · Main lokal, tanpa akun. Detail di tombol ⓘ Info.
 </footer>
 
 <div class="overlay" id="gate">
@@ -364,6 +363,21 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       <button class="primary" onclick="window.open('https://lynk.id/ochadpage','_blank')">Dapatkan Kode Akses — Lynk · Segera Hadir</button>
     </div>
     <button class="primary" onclick="closeBuy()">Mengerti</button>
+  </div>
+</div>
+
+<div class="overlay" id="infoOverlay" style="display:none">
+  <div class="modal">
+    <h2>Info</h2>
+    <p class="small" style="text-align:left;line-height:1.7">
+      <b>Tentang:</b> Ludo Berdua — Truth or Dare untuk pasangan dewasa (pasutri, PDKT, menuju serius). Satu papan, dua hati.<br><br>
+      <b>Cara main singkat:</b> Home → START ★ → keliling 52 kotak searah jarum jam → Jalur Home 6 kotak → Finish, harus angka pas. 2 pion per pemain, tanpa makan pion, menang kalau kedua pion sampai finish. Kotak ganjil = kartu: T (Truth) dan D (Dare), selang-seling, 26 dari 52 kotak. Dua pojok krem hanya hiasan.<br><br>
+      <b>Privasi:</b> khusus 18+, atas persetujuan bersama. Game berjalan lokal di perangkatmu, tidak mengirim data ke server. Kartu boleh dilewati kapan pun, tanpa hukuman.<br><br>
+      <b>Musik &amp; suara:</b> dibuat dari Web Audio di perangkatmu, tanpa lagu berlisensi. Musik mengikuti mood topik: Romantis, Serius, Santai.<br><br>
+      <b>Catatan jujur:</b> ini 2 pion per pemain, fokusnya kartu pasangan, bukan turnamen Ludo.<br><br>
+      <b>Pembelian:</b> deck lengkap Rp19.000 (normal Rp25.000), 276 kartu + pilih topik. Toko Lynk masih tahap aktivasi — detail di Cara Beli, atau hubungi via DM @ludoberdua.
+    </p>
+    <button class="primary" onclick="closeInfo()">Mengerti</button>
   </div>
 </div>
 
@@ -872,7 +886,7 @@ function updateProgress(){
   const done = step[0].concat(step[1]).reduce((a,s)=>a + (s < 0 ? 0 : s), 0);
   const pct = Math.round(done / 116 * 100);
   const remain = 116 - done;
-  el.textContent = gameOver ? "Sampai finish!" : "Perjalanan ke finish: " + done + " dari 116 langkah · sisa " + remain + " langkah · " + pct + "%";
+  el.textContent = gameOver ? "Sampai finish!" : done + " dari 116 langkah · " + pct + "%";
   fill.style.width = pct + "%";
 }
 function pickCard(deck, kind){
@@ -1035,8 +1049,8 @@ function updateUnlockUI(){
     if(st) st.textContent = !unlocked ? "\uD83D\uDD12 Deck Lengkap" : (selectedTopic === t ? "\u2713 Dipilih" : "Terbuka \u2014 tap untuk pilih");
   });
   document.getElementById("topicNote").textContent = unlocked
-    ? "Berbayar = bisa pilih topik spesifik (Umum, Honeymoon, Kehamilan, Anniversary, Liburan, Ranjang khusus pasutri, plus Deep Talk: Politik, Ekonomi, Agama, Masa Depan, Rumah Tangga) + bank kartu jauh lebih besar. Topik Deep Talk cocok buat PDKT / menuju serius. Pilih Semua Topik untuk kartu acak dari semua topik."
-    : "Buka deck lengkap untuk memilih topik spesifik dan bank kartu yang jauh lebih besar.";
+    ? "Deck lengkap terbuka — pilih topik di atas."
+    : "Deck lengkap = pilih topik + 276 kartu.";
   updateMusicIndicator();
 }
 function selectTopic(t){
@@ -1287,6 +1301,12 @@ function closeCard(){
 }
 function resolvePawn(i){
   if(pawnChoiceResolve){ const r = pawnChoiceResolve; pawnChoiceResolve = null; r(i); }
+}
+function showInfo(){
+  document.getElementById("infoOverlay").style.display = "flex";
+}
+function closeInfo(){
+  document.getElementById("infoOverlay").style.display = "none";
 }
 function showBuy(){
   document.getElementById("buyOverlay").style.display = "flex";
