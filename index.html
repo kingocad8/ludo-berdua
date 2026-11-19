@@ -150,6 +150,14 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
   .overlay{position:fixed;inset:0;background:rgba(30,15,20,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
   .modal{background:#fff;border-radius:26px;padding:0 22px 22px;max-width:480px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;max-height:92vh;overflow-y:auto}
   .modal h2{margin:0 -22px 16px;padding:16px 22px;color:#fff;font-family:Georgia,"Times New Roman",serif;background:linear-gradient(135deg,#c9566f,var(--rose) 55%,var(--teal));border-bottom:3px solid #c9a86a;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+  /* v17: pop-up ikut warna pemain yang sedang giliran — P1 rose, P2 teal.
+     Modal netral (gerbang 18+, Cara Main, Cara Beli) tetap gradasi rose-teal di atas. */
+  .modal.p1 h2{background:linear-gradient(135deg,#d4607d,var(--rose) 55%,#8f2f48)}
+  .modal.p2 h2{background:linear-gradient(135deg,#2a9a93,var(--teal) 55%,#073432)}
+  .modal.p1{border-top:6px solid var(--rose)}
+  .modal.p2{border-top:6px solid var(--teal)}
+  .modal.p2 .primary{background:linear-gradient(180deg,#2a9a93,var(--teal) 60%,#073432);box-shadow:0 4px 0 #073432,0 8px 14px rgba(15,94,90,.3)}
+  .modal.p2 .primary:active{box-shadow:0 1px 0 #073432,0 3px 6px rgba(15,94,90,.3)}
   .small{font-size:13px;color:#6b5a60;line-height:1.5}
   #cardMeta{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0 2px}
   #cardMeta span{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:#f2efe9;color:#6b5a60;border:1px solid #ddd5c8}
@@ -257,7 +265,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
 
 <div class="overlay" id="diceOverlay" style="display:none">
   <div class="modal">
-    <h2>Mengocok dadu…</h2>
+    <h2 id="diceTitle">Mengocok dadu…</h2>
     <div id="bigDice">🎲</div>
     <p class="small">Tunggu sebentar, dadunya lagi dikocok.</p>
   </div>
@@ -300,7 +308,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
 </div>
 <div class="overlay" id="pawnOverlay" style="display:none">
   <div class="modal">
-    <h2>Pilih Pion</h2>
+    <h2 id="pawnTitle">Pilih Pion</h2>
     <p class="small" id="pawnChoiceText">Pion mana yang jalan?</p>
     <div class="row" style="justify-content:center">
       <button class="primary" id="pawnBtn0" onclick="resolvePawn(0)">Pion 1</button>
@@ -1066,12 +1074,19 @@ function unlockFull(){
     alert("Kode belum cocok. Periksa lagi kode dari penjual, atau hubungi penjual setelah pembayaran terverifikasi.");
   }
 }
+// v17: warna pop-up mengikuti pemain yang sedang giliran (P1 rose, P2 teal).
+function setPlayerModal(overlayId){
+  const m = document.querySelector("#" + overlayId + " .modal");
+  if(m) m.className = "modal p" + (turn + 1);
+}
 async function rollDice(){
   if(gameOver || animating) return;
   animating = true;
   ensureAudio();
   if(musicOn && !musicTimer) startMusic();
   document.getElementById("rollBtn").disabled = true;
+  setPlayerModal("diceOverlay");
+  document.getElementById("diceTitle").textContent = names()[turn] + " mengocok dadu…";
   // 1) Animasi kocok dadu 1-2 detik, pop-up dadu dikocok
   const overlay = document.getElementById("diceOverlay");
   const big = document.getElementById("bigDice");
@@ -1103,6 +1118,8 @@ async function rollDice(){
   }
   let chosen = movable[0];
   if(movable.length === 2){
+    setPlayerModal("pawnOverlay");
+    document.getElementById("pawnTitle").textContent = nm + ": Pilih Pion";
     document.getElementById("pawnChoiceText").textContent = nm + " dapat " + d + ". Pion mana yang jalan? Pion " + (turn+1) + "A: " + pawnDesc(step[turn][0]) + ", Pion " + (turn+1) + "B: " + pawnDesc(step[turn][1]) + ".";
     document.getElementById("pawnBtn0").textContent = "Pion " + (turn+1) + "A (" + pawnDesc(step[turn][0]) + ")";
     document.getElementById("pawnBtn1").textContent = "Pion " + (turn+1) + "B (" + pawnDesc(step[turn][1]) + ")";
@@ -1127,6 +1144,7 @@ async function rollDice(){
   document.getElementById("log").textContent = nm + " dapat " + d + ", pion " + (chosen === 0 ? "1A" : "1B") + " maju ke langkah " + target + ".";
   if(step[turn][0] === WIN_STEP && step[turn][1] === WIN_STEP){
     gameOver = true; playWin(); renderBoard();
+    setPlayerModal("winOverlay");
     document.getElementById("winText").textContent = "Selamat, " + nm + "!";
     document.getElementById("winOverlay").style.display = "flex";
     animating = false; document.getElementById("rollBtn").disabled = false;
@@ -1156,6 +1174,7 @@ async function rollDice(){
 }
 function openCard(kind){
   playCard();
+  setPlayerModal("cardOverlay");
   cardPrevMood = currentMood;
   let cardMood = "santai";
   if(unlocked && selectedTopic !== "semua") cardMood = moodForTopic(selectedTopic);
