@@ -77,6 +77,29 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
   .cell.cellTruth span{color:#0a4642;font-weight:800}
   .cell.cellDare{background:#f9c3cf;box-shadow:inset 0 -3px 0 rgba(143,47,72,.35),inset 0 1px 0 rgba(255,255,255,.7)}
   .cell.cellDare span{color:#8f2f48;font-weight:800}
+  /* v19: simbol kartu di papan (mini kartu T/D, bukan petir/chat) + 2 tumpukan kartu di luar meja */
+  .cell .miniCard{display:inline-flex;align-items:center;justify-content:center;width:18px;height:22px;background:#fff;border-radius:3px;font-size:12px;font-weight:900;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+  .cell.cellTruth .miniCard{border:2px solid #0f5e5a;color:#0f5e5a}
+  .cell.cellDare .miniCard{border:2px solid #b3405e;color:#b3405e}
+  .decks{display:flex;gap:12px;margin:14px 0 4px}
+  .deck{position:relative;flex:1;border-radius:14px;padding:12px 10px 10px;text-align:center;color:#fff}
+  .deckTruth{background:linear-gradient(180deg,#1b7d78,#0f5e5a);box-shadow:0 3px 0 #0a4642,0 6px 0 #083a37,0 12px 18px rgba(0,0,0,.28)}
+  .deckDare{background:linear-gradient(180deg,#c9566f,#b3405e);box-shadow:0 3px 0 #8f2f48,0 6px 0 #6f2236,0 12px 18px rgba(0,0,0,.28)}
+  .deck .deckLetter{font-size:34px;font-weight:900;line-height:1;background:#fff;border-radius:8px;display:inline-block;padding:4px 10px;margin-bottom:4px;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+  .deckTruth .deckLetter{color:#0f5e5a}
+  .deckDare .deckLetter{color:#b3405e}
+  .deck .deckName{font-weight:800;letter-spacing:1px;font-size:14px}
+  .deck .deckSub{font-size:11px;opacity:.9}
+  .deck .flyCard{position:absolute;left:50%;top:-8px;width:34px;height:44px;margin-left:-17px;background:#fff;border-radius:5px;border:2px solid #c9a86a;color:#2b2226;font-weight:900;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:2}
+  .deck.drawing{animation:deckLift .65s ease}
+  .deck.drawing .flyCard{animation:flyCard .65s ease}
+  @keyframes deckLift{0%{transform:translateY(0) rotate(0)}30%{transform:translateY(-12px) rotate(-3deg) scale(1.03)}60%{transform:translateY(-4px) rotate(2deg)}100%{transform:translateY(0)}}
+  @keyframes flyCard{0%{opacity:0;transform:translateY(10px) scale(.8)}35%{opacity:1;transform:translateY(-26px) scale(1.05) rotate(-6deg)}100%{opacity:0;transform:translateY(-52px) scale(1) rotate(4deg)}}
+  .cardFace{border:3px solid #c9a86a;border-radius:16px;padding:18px 14px;margin:14px 0;background:linear-gradient(180deg,#fffdf8,#fff7f0);position:relative;overflow:hidden}
+  .cardFace.truth{border-color:#0f5e5a}
+  .cardFace.dare{border-color:#b3405e}
+  .cardFace::before{content:attr(data-letter);position:absolute;right:6px;top:-16px;font-size:96px;font-weight:900;opacity:.08;line-height:1}
+  #cardText{position:relative;z-index:1}
   .cell.start1{background:#f9d7de}
   .cell.start2{background:#d5ebe8}
   .cell.home1{background:#f9d7de}
@@ -194,8 +217,12 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
     <div id="status">Pion masih di home. Lempar dadu untuk mulai.</div>
     <div id="dice">🎲</div>
     <div class="board3d"><div id="board"></div></div>
+    <div class="decks">
+      <div class="deck deckTruth" id="deckTruth"><span class="flyCard">T</span><span class="deckLetter">T</span><div class="deckName">TRUTH</div><div class="deckSub">Tumpukan kartu Truth</div></div>
+      <div class="deck deckDare" id="deckDare"><span class="flyCard">D</span><span class="deckLetter">D</span><div class="deckName">DARE</div><div class="deckSub">Tumpukan kartu Dare</div></div>
+    </div>
     <div id="progressBox"><div id="progressText">Perjalanan ke finish: 0 dari 58 langkah</div><div class="progressWrap"><div id="progressFill"></div></div></div>
-    <div id="log">Lempar dadu untuk mulai. Mendarat di 💬 = kartu Truth, di ⚡ = kartu Dare.</div>
+    <div id="log">Lempar dadu untuk mulai. Mendarat di kartu T = Truth, di kartu D = Dare.</div>
     <div class="rollBar">
       <button class="primary" id="rollBtn" onclick="rollDice()">🎲 Kocok Dadu</button>
     </div>
@@ -206,7 +233,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       <button class="secondary" onclick="showRoute()">Cara Main &amp; Rute</button>
       <button class="secondary" onclick="showBuy()">Cara Beli</button>
     </div>
-    <p class="small" style="text-align:center">Rute umum, sama seperti Ludo biasa: Home → START ★ → keliling searah jarum jam (52 kotak) → Jalur Home 6 kotak warna pemain → Finish tengah, harus angka pas. 2 pion per pemain, tanpa makan pion, fokusnya kartu. Menang kalau kedua pionmu sampai finish. Setiap kotak ganjil = kartu: 26 dari 52 kotak trek (50%), selang-seling 💬 Truth dan ⚡ Dare. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat. Penjelasan lengkap ada di tombol Cara Main &amp; Rute.</p>
+    <p class="small" style="text-align:center">Rute umum, sama seperti Ludo biasa: Home → START ★ → keliling searah jarum jam (52 kotak) → Jalur Home 6 kotak warna pemain → Finish tengah, harus angka pas. 2 pion per pemain, tanpa makan pion, fokusnya kartu. Menang kalau kedua pionmu sampai finish. Setiap kotak ganjil = kartu: 26 dari 52 kotak trek (50%), selang-seling kartu T (Truth, hijau tosca) dan kartu D (Dare, merah muda) — mendarat di sana, satu kartu diambil dari tumpukan di bawah papan. Dua pojok krem itu hiasan papan saja, bukan pemain ketiga dan keempat. Penjelasan lengkap ada di tombol Cara Main &amp; Rute.</p>
     <div id="unlockBox">
       <p id="unlockStatus">Mode: <b>Demo gratis</b> — 1 topik ringan saja.</p>      <div class="topicSection">
         <h3>Pilih Topik</h3>
@@ -283,7 +310,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       <button class="primary" onclick="showCard('truth')">Truth</button>
       <button class="teal" onclick="showCard('dare')">Dare</button>
     </div>
-    <div id="cardText" style="font-size:18px;line-height:1.5;margin:16px 0"></div>
+    <div class="cardFace" id="cardFace" data-letter="T"><div id="cardText" style="font-size:18px;line-height:1.5"></div></div>
     <div class="row" style="justify-content:center">
       <button class="secondary" onclick="closeCard()">Lewati Kartu</button>
       <button class="primary" id="doneBtn" style="display:none" onclick="completeCard()">Selesai, Lanjut Main</button>
@@ -300,7 +327,7 @@ Catatan v16 (Oemar 19 Nov: v15 "gak banyak berubah", topik gembok berantakan, mu
       1. Pion mulai di home pojok: Pemain 1 rose kiri atas, Pemain 2 teal kanan bawah.<br>
       2. Lempar dadu, pion masuk ke kotak START ★.<br>
       3. Jalan searah jarum jam mengelilingi papan, total 52 kotak trek.<br>
-      4. Mendarat di kotak ganjil = dapat kartu: 💬 hijau tosca = Truth, ⚡ merah muda = Dare, selang-seling. Total 26 kotak kartu dari 52 kotak trek (50%).<br>
+      4. Mendarat di kotak ganjil = dapat kartu: kartu T hijau tosca = Truth, kartu D merah muda = Dare, selang-seling. Total 26 kotak kartu dari 52 kotak trek (50%). Kartu diambil dari tumpukan Truth/Dare di bawah papan.<br>
       5. Setelah satu putaran penuh, masuk Jalur Home: 6 kotak warna pemain masing-masing.<br>
       6. Sampai di tengah (finish) dengan angka pas. Menang kalau KEDUA pionmu sudah sampai finish. Kalau angka lebih, pion itu tetap di tempat.<br>
       7. 2 pion per pemain, tanpa makan pion. Kalau kedua pion bisa jalan, kamu pilih pion mana yang jalan. Dua pojok krem adalah hiasan papan, bukan pemain ketiga dan keempat.<br>
@@ -1045,15 +1072,15 @@ function renderBoard(){
       if(r>=6 && r<=8 && c>=6 && c<=8) cls += " center";
       if(k === key(WIN_CELL[0],WIN_CELL[1])) label = "♥";
       if(trackMap[k] !== undefined){
-        if(TRUTH_IDX.has(trackMap[k])){ cls += " cellTruth"; label = "💬"; }
-        else if(DARE_IDX.has(trackMap[k])){ cls += " cellDare"; label = "⚡"; }
+        if(TRUTH_IDX.has(trackMap[k])){ cls += " cellTruth"; label = "<span class=\"miniCard\">T</span>"; }
+        else if(DARE_IDX.has(trackMap[k])){ cls += " cellDare"; label = "<span class=\"miniCard\">D</span>"; }
         if(trackMap[k] === START[0]){ cls += " start1"; label = "★"; }
         if(trackMap[k] === START[1]){ cls += " start2"; label = "★"; }
       }
       if(homeMap[k]) cls += " " + homeMap[k];
       if(unusedHome.has(k)) cls += " homeX";
       cell.className = cls;
-      cell.innerHTML = label ? "<span>" + label + "</span>" : "";
+      cell.innerHTML = label ? (label.indexOf("<span") === 0 ? label : "<span>" + label + "</span>") : "";
       const coord = [r,c];
       const here = [];
       [0,1].forEach(p=>{ [0,1].forEach(i=>{ const pc = posCoord(p,i); if(pc[0]===r && pc[1]===c) here.push([p,i]); }); });
@@ -1089,6 +1116,16 @@ function unlockFull(){
   } else {
     alert("Kode belum cocok. Periksa lagi kode dari penjual, atau hubungi penjual setelah pembayaran terverifikasi.");
   }
+}
+// v19: animasi ambil kartu dari tumpukan — tumpukan terangkat, satu kartu terbang ke atas,
+// baru pop-up kartu dibuka. Dipanggil sebelum openCard, supaya kelihatan proses ambilnya.
+function deckDraw(kind){
+  return new Promise(res=>{
+    const el = document.getElementById(kind === "truth" ? "deckTruth" : "deckDare");
+    if(!el){ res(); return; }
+    el.classList.remove("drawing"); void el.offsetWidth; el.classList.add("drawing");
+    setTimeout(()=>{ el.classList.remove("drawing"); res(); }, 650);
+  });
 }
 // v17: warna pop-up mengikuti pemain yang sedang giliran (P1 rose, P2 teal).
 function setPlayerModal(overlayId){
@@ -1170,13 +1207,15 @@ async function rollDice(){
   // supaya pemain langsung merasakan isi gamenya, bukan cuma lempar dadu kosong.
   if(!unlocked && demoCardCount < 2){
     demoCardCount++;
-    playHeart(); openCard(demoCardCount === 1 ? "truth" : "dare");
+    const demoKind = demoCardCount === 1 ? "truth" : "dare";
+    playHeart(); await deckDraw(demoKind); openCard(demoKind);
     animating = false; document.getElementById("rollBtn").disabled = false;
     return;
   }
   const landedIdx = absTrackIdx(turn, chosen);
   if(TRUTH_IDX.has(landedIdx) || DARE_IDX.has(landedIdx)){
-    playHeart(); openCard(TRUTH_IDX.has(landedIdx) ? "truth" : "dare");
+    const landKind = TRUTH_IDX.has(landedIdx) ? "truth" : "dare";
+    playHeart(); await deckDraw(landKind); openCard(landKind);
     animating = false; document.getElementById("rollBtn").disabled = false;
     return;
   }
@@ -1191,6 +1230,8 @@ async function rollDice(){
 function openCard(kind){
   playCard();
   setPlayerModal("cardOverlay");
+  const cf = document.getElementById("cardFace");
+  if(cf){ cf.className = "cardFace " + kind; cf.setAttribute("data-letter", kind === "truth" ? "T" : "D"); }
   cardPrevMood = currentMood;
   let cardMood = "santai";
   if(unlocked && selectedTopic !== "semua") cardMood = moodForTopic(selectedTopic);
@@ -1204,7 +1245,7 @@ function openCard(kind){
   const mc = document.getElementById("cardMoodChip");
   if(mc){ mc.textContent = MOOD_LABEL[cardMood] + " \u266A"; mc.className = "mood-" + cardMood; }
   const isTruth = kind === "truth";
-  document.getElementById("cardTitle").textContent = (isTruth ? "Kartu Truth 💬 — " : "Kartu Dare ⚡ — ") + names()[turn];
+  document.getElementById("cardTitle").textContent = (isTruth ? "Kartu Truth — " : "Kartu Dare — ") + names()[turn];
   document.getElementById("cardPrompt").textContent = (isTruth ? "Truth" : "Dare") + " — " + topicLabel() + ". Jawab / lakukan dengan jujur dan saling menghormati.";
   // Kartu langsung keluar, tanpa pilih Truth/Dare lagi, karena selnya sudah dibedakan.
   showCard(kind);
